@@ -17,6 +17,7 @@ INC_FLAGS = -I $(TOP)						\
 O_FILE = main.adb main.bin main.cdb main.ihx main.lst main.mem main.rel main.sym \
 		main.asm main.hex main.lk main.map main.omf main.rst \
 		led.adb  led.asm  led.lst  led.rel  led.rst  led.sym \
+		time.adb  time.asm  time.lst  time.rel  time.rst  time.sym \
 
 
 # Options for developmentCFLAGS = -mmcs51 --debug 
@@ -30,12 +31,14 @@ main.bin : main.hex
 main.hex : main.ihx
 	$(PACKIHX) main.ihx > main.hex
 
-main.ihx : main.c led.rel
-	$(CC) $(INC_FLAGS) $(CFLAGS) main.c led.rel
-
+main.ihx : main.c led.rel time.rel
+	$(CC) $(INC_FLAGS) $(CFLAGS) main.c led.rel time.rel
 
 led.rel : led.c
 	$(CC) -c $(INC_FLAGS) $(CFLAGS) led.c
+
+time.rel : time.c
+	$(CC) -c $(INC_FLAGS) $(CFLAGS) time.c
 
 .PHONY : clean update
 

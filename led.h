@@ -3,20 +3,24 @@
 
 #include <8052.h>
 
-#define led0 P2_6
-#define led1 P2_7
-#define led2 P0_7
-#define led3 P0_6
-#define led4 P1_1
-#define led5 P1_2
-#define led6 P1_3
-#define led7 P1_0
+#define led0 P0_0
+#define led1 P0_1
+#define led2 P0_2
+#define led3 P0_3
+#define led4 P0_4
+#define led5 P0_5
+#define led6 P0_6
+#define led7 P0_7
 
-void motor1_up(void);
-void motor1_low(void);
-void motor1_stop(void);
-void motor2_left(void);
-void motor2_right(void);
-void motor2_stop(void);
+#define addr0 P1_0
+#define addr1 P1_1
+#define addr2 P1_2
+#define addr3 P1_3
+#define leden P1_4
+
+#define	HIGH	1
+#define	LOW		0
+
+void led_init(int data);
 
 #endif

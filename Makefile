@@ -18,9 +18,11 @@ O_FILE = main.adb main.bin main.cdb main.ihx main.lst main.mem main.rel main.sym
 		main.asm main.hex main.lk main.map main.omf main.rst \
 		led.adb  led.asm  led.lst  led.rel  led.rst  led.sym \
 		time.adb  time.asm  time.lst  time.rel  time.rst  time.sym \
+		seg.adb  seg.asm  seg.lst  seg.rel  seg.rst  seg.sym \
+		lcd1602.adb  lcd1602.asm  lcd1602.lst  lcd1602.rel  lcd1602.rst  lcd1602.sym \
 
 
-# Options for developmentCFLAGS = -mmcs51 --debug 
+# Options for developmentCFLAGS = -mmcs51 --debug
 
 # Options for release
 # CFLAGS = -mmcs51 --std-sdcc89 -W
@@ -31,14 +33,20 @@ main.bin : main.hex
 main.hex : main.ihx
 	$(PACKIHX) main.ihx > main.hex
 
-main.ihx : main.c led.rel time.rel
-	$(CC) $(INC_FLAGS) $(CFLAGS) main.c led.rel time.rel
+main.ihx : main.c led.rel time.rel seg.rel lcd1602.rel
+	$(CC) $(INC_FLAGS) $(CFLAGS) main.c led.rel time.rel seg.rel lcd1602.rel
 
 led.rel : led.c
 	$(CC) -c $(INC_FLAGS) $(CFLAGS) led.c
 
 time.rel : time.c
 	$(CC) -c $(INC_FLAGS) $(CFLAGS) time.c
+
+seg.rel : seg.c
+	$(CC) -c $(INC_FLAGS) $(CFLAGS) seg.c
+
+lcd1602.rel : lcd1602.c
+	$(CC) -c $(INC_FLAGS) $(CFLAGS) lcd1602.c
 
 .PHONY : clean update
 

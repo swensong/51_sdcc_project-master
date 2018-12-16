@@ -1,19 +1,40 @@
 
+lcd1602.c,162
+void lcd_wait_ready(3,22
+void lcd_write_cmd(18,383
+void lcd_write_dat(29,617
+void lcd_set_cursor(40,876
+void lcd_show_str(52,1348
+void init_lcd1602(61,1672
+
+seg.c,161
+unsigned char led_char[led_char3,18
+unsigned char led_buff[led_buff8,193
+char i 12,335
+void seg_init(14,348
+void seg_driver(20,514
+void seg_index(30,786
+
 led.c,20
 void led_init(3,18
 
-led.h,225
+led.h,335
 #define __LED_H__2,18
-#define led0 6,56
-#define led1 7,74
-#define led2 8,92
-#define led3 9,110
-#define led4 10,128
-#define led5 11,146
-#define led6 12,164
-#define led7 13,182
-#define	HIGH	15,201
-#define	LOW	16,216
+#define LED0 6,56
+#define LED1 7,74
+#define LED2 8,92
+#define LED3 9,110
+#define LED4 10,128
+#define LED5 11,146
+#define LED6 12,164
+#define LED7 13,182
+#define ADDR0 15,201
+#define ADDR1 16,220
+#define ADDR2 17,239
+#define ADDR3 18,258
+#define LEDEN 19,277
+#define	HIGH	21,297
+#define	LOW	22,312
 
 stdint.h,118
 #define __STDINT_H2,19
@@ -21,7 +42,28 @@ typedef unsigned char u8;4,39
 typedef unsigned int u16;5,65
 typedef unsigned long u32;6,91
 
-main.c,16
-void main(3,18
+seg.h,121
+#define ADDR0 5,35
+#define ADDR1 6,54
+#define ADDR2 7,73
+#define ADDR3 8,92
+#define LEDEN 9,111
+#define SEG	11,131
 
-main.hex,0
+time.c,26
+void base_time_init(3,19
+
+lcd1602.h,125
+#define _LCD1602_H2,19
+#define LCD1602_DB 6,58
+#define LCD1602_RS 7,80
+#define LCD1602_RW 8,104
+#define LCD1602_E 9,128
+
+main.c,87
+char flag1s 6,74
+void main(10,117
+void interrupt_timer(41,661
+void delay_ms(61,873
+
+time.h,0

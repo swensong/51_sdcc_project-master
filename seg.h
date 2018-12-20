@@ -12,6 +12,7 @@
 
 void seg_init(void);
 void seg_index(void);
+void seg_show_num(unsigned int num);
 void seg_driver(char sec);
 
 #endif

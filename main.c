@@ -2,6 +2,7 @@
 #include "seg.h"
 #include "time.h"
 #include "lcd1602.h"
+#include "key.h"
 
 char flag1s = 0;
 
@@ -16,16 +17,19 @@ void main(void)
     base_time_init();
     EA = 1;
 
+    seg_show_num(1101);
+
     lcd_show_str(0, 0, "hello world!");
     lcd_show_str(0, 1, "hello world!");
 
     while (1)
     {
+        key_driver();
         if (flag1s == 1)
         {
             flag1s = 0;
 
-            seg_driver(cnt++);
+            /* seg_driver(cnt++); */
             /* if (P3_0 == 1) */
             /* { */
             /*     P3_0 = 0; */
@@ -45,6 +49,7 @@ void interrupt_timer() __interrupt 1
     TH0 = 0xFC;
     TL0 = 0x67;
 
+    key_scan();
     seg_index();
 
     if (cnt++ >= 1000)

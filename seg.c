@@ -1,6 +1,6 @@
 #include "seg.h"
 
-unsigned char led_char[16] = { /* 数码管显示字符转换表 */
+unsigned char __code led_char[16] = { /* 数码管显示字符转换表 */
     0xC0, 0xF9, 0xA4, 0xB0, 0x99, 0x92, 0x82, 0xF8,
     0x80, 0x90, 0x88, 0x83, 0xC6, 0xA1, 0x86, 0x8E
 };
@@ -10,6 +10,15 @@ unsigned char led_buff[6] = {    /* 数码管显示缓冲区，初始值0xFF确�
 };
 
 char i = 0;
+
+void seg_show_num(unsigned int num)
+{
+    led_buff[4] = led_char[num / 10000];
+    led_buff[3] = led_char[num / 1000 % 10];
+    led_buff[2] = led_char[num / 100 % 10];
+    led_buff[1] = led_char[num / 10 % 10];
+    led_buff[0] = led_char[num % 10];
+}
 
 void seg_init(void)
 {

@@ -2,7 +2,7 @@
 #include "seg.h"
 
 unsigned char key_code_map[4][4] = {
-    { 0x31, 0x32, 0x33, 0x34 }, /* 数字键1, 数字键2, 数字键3, 向上键 */
+    { 0x31, 0x32, 0x33, 0x24 }, /* 数字键1, 数字键2, 数字键3, 向上键 */
     { 0x34, 0x35, 0x36, 0x25 }, /* 数字键4, 数字键5, 数字键6, 向左键 */
     { 0x37, 0x38, 0x39, 0x28 }, /* 数字键7, 数字键8, 数字键9, 向下键 */
     { 0x30, 0x1B, 0x0D, 0x27 }  /* 数字键0, ESC 键, 回车键, 向右键 */
@@ -19,6 +19,30 @@ void key_action(unsigned char key_code)
     if ((key_code >= 0x30) && (key_code <= 0x39)) /* 输入0～9 */
     {
         show_num = key_code - 0x30;
+    }
+    else if (key_code == 0x24)
+    {
+        show_num++;
+    }
+    else if (key_code == 0x25)
+    {
+        show_num = show_num*10;
+    }
+    else if (key_code == 0x28)
+    {
+        show_num--;
+    }
+    else if (key_code == 0x27)
+    {
+        show_num = show_num/10;
+    }
+    else if (key_code == 0x0D)
+    {
+        show_num = 5120;
+    }
+    else if (key_code == 0x1B)
+    {
+        show_num = 0;
     }
 
     seg_show_num(show_num);
@@ -37,7 +61,8 @@ void key_driver(void)
         {
             if (back_up[i][j] != key_sta[i][j])
             {
-                key_action(key_code_map[i][j]);
+                if (key_sta[i][j] == 1)
+                    key_action(key_code_map[i][j]);
             }
             back_up[i][j] = key_sta[i][j];
         }

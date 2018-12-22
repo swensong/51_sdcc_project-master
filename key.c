@@ -40,7 +40,7 @@ void key_action(unsigned char key_code)
     {
         show_num = 5120;
     }
-    else if (key_code == 0x1B)
+    else if (key_code == 0x1B)  /* ESC按键，电机控制按键 */
     {
         show_num = 0;
     }

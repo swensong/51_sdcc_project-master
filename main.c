@@ -3,6 +3,7 @@
 #include "time.h"
 #include "lcd1602.h"
 #include "key.h"
+#include "motor.h"
 
 char flag1s = 0;
 
@@ -13,7 +14,7 @@ void main(void)
     /* led_init(HIGH); */
     char cnt = 0;
     init_lcd1602();
-    seg_init();
+    /* seg_init(); */
     base_time_init();
     EA = 1;
 
@@ -50,7 +51,8 @@ void interrupt_timer() __interrupt 1
     TL0 = 0x67;
 
     key_scan();
-    seg_index();
+    /* seg_index(); */
+    motor_scan();
 
     if (cnt++ >= 1000)
     {

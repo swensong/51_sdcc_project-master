@@ -4,8 +4,10 @@
 #include "lcd1602.h"
 #include "key.h"
 #include "motor.h"
+#include "uart.h"
 
 char flag1s = 0;
+extern unsigned char flag_txd;
 
 void delay_ms(int xms);
 
@@ -15,12 +17,14 @@ void main(void)
     char cnt = 0;
     init_lcd1602();
     /* seg_init(); */
+    config_uart(9600);
     base_time_init();
     EA = 1;
 
     seg_show_num(1101);
 
-    lcd_show_str(0, 0, "hello world!");
+    /* lcd_show_str(0, 0, "hello world!"); */
+    delay_ms(100);
     lcd_show_str(0, 1, "hello world!");
 
     while (1)
@@ -60,6 +64,11 @@ void interrupt_timer() __interrupt 1
         flag1s = 1;
     }
 
+}
+
+void interrupt_uart() __interrupt 4
+{
+    /* uart_scan(); */
 }
 
 

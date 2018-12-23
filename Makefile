@@ -17,6 +17,7 @@ INC_FLAGS = -I $(TOP)						\
 O_FILE = main.adb main.bin main.cdb main.ihx main.lst main.mem main.rel main.sym \
 		main.asm main.hex main.lk main.map main.omf main.rst \
 		led.adb  led.asm  led.lst  led.rel  led.rst  led.sym \
+		uart.adb  uart.asm  uart.lst  uart.rel  uart.rst  uart.sym \
 		time.adb  time.asm  time.lst  time.rel  time.rst  time.sym \
 		seg.adb  seg.asm  seg.lst  seg.rel  seg.rst  seg.sym \
 		lcd1602.adb  lcd1602.asm  lcd1602.lst  lcd1602.rel  lcd1602.rst  lcd1602.sym \
@@ -35,8 +36,8 @@ main.bin : main.hex
 main.hex : main.ihx
 	$(PACKIHX) main.ihx > main.hex
 
-main.ihx : main.c led.rel time.rel seg.rel lcd1602.rel key.rel motor.rel
-	$(CC) $(INC_FLAGS) $(CFLAGS) main.c led.rel time.rel seg.rel lcd1602.rel key.rel motor.rel
+main.ihx : main.c led.rel time.rel seg.rel lcd1602.rel key.rel motor.rel uart.rel
+	$(CC) $(INC_FLAGS) $(CFLAGS) main.c led.rel time.rel seg.rel lcd1602.rel key.rel motor.rel uart.rel
 
 led.rel : led.c
 	$(CC) -c $(INC_FLAGS) $(CFLAGS) led.c
@@ -55,6 +56,9 @@ key.rel : key.c
 
 motor.rel : motor.c
 	$(CC) -c $(INC_FLAGS) $(CFLAGS) motor.c
+
+uart.rel : uart.c
+	$(CC) -c $(INC_FLAGS) $(CFLAGS) uart.c
 
 .PHONY : clean update
 

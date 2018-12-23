@@ -1,5 +1,6 @@
 #include "key.h"
 #include "seg.h"
+#include "uart.h"
 
 unsigned char key_code_map[4][4] = {
     { 0x31, 0x32, 0x33, 0x24 }, /* 数字键1, 数字键2, 数字键3, 向上键 */
@@ -43,6 +44,7 @@ void key_action(unsigned char key_code)
     else if (key_code == 0x1B)  /* ESC按键，电机控制按键 */
     {
         show_num = 0;
+        uart_send("123", 3);
     }
 
     seg_show_num(show_num);

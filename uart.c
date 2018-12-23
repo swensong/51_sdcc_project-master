@@ -1,7 +1,5 @@
 #include "uart.h"
 
-unsigned char flag_txd = 0;
-
 void config_uart(unsigned int baud)
 {
     SCON = 0x50;
@@ -18,9 +16,9 @@ void uart_send(unsigned char *buf, unsigned char len)
 {
     while (len--)
     {
-        flag_txd = 0;
+        TI = 0;
         SBUF = *buf++;          /* 发送一个字节数据 */
-        while (flag_txd != 0);            /* 等待该字节发送完成 */
+        while (!TI);           /* 等待该字节发送完成 */
     }
 }
 
@@ -32,7 +30,5 @@ void uart_scan(void)
     }
     if (TI)
     {
-        TI = 0;
-        flag_txd = 1;
     }
 }

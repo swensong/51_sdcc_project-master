@@ -7,6 +7,8 @@
 #include "uart.h"
 
 char flag1s = 0;
+extern unsigned char T0RH;
+extern unsigned char T0RL;
 
 void delay_ms(int xms);
 
@@ -16,7 +18,7 @@ void main(void)
     char cnt = 0;
     init_lcd1602();
     seg_init();
-    base_time_init();
+    time0_init(1);
     config_uart(9600);
     EA = 1;
 
@@ -48,8 +50,8 @@ void interrupt_timer() __interrupt 1
 {
     static int cnt = 0;
 
-    TH0 = 0xFC;
-    TL0 = 0x67;
+    TH0 = T0RH;
+    TL0 = T0RL;
 
     key_scan();
     seg_index();

@@ -2,6 +2,6 @@
 
 #include <8052.h>
 
-void base_time_init(void);
+void time0_init(unsigned int ms);
 
 #endif

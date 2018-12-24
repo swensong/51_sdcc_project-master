@@ -23,5 +23,6 @@ key.rel
 motor.rel
 uart.rel
 i2c.rel
+ds1302.rel
 
 -e

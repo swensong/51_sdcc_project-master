@@ -8,6 +8,7 @@
 ;--------------------------------------------------------
 ; Public variables in this module
 ;--------------------------------------------------------
+	.globl _key_code_map
 	.globl _uart_send
 	.globl _seg_show_num
 	.globl _TF2
@@ -130,7 +131,6 @@
 	.globl _SP
 	.globl _P0
 	.globl _key_sta
-	.globl _key_code_map
 	.globl _key_action
 	.globl _key_driver
 	.globl _key_scan
@@ -272,8 +272,6 @@ _TF2	=	0x00cf
 ; internal ram data
 ;--------------------------------------------------------
 	.area DSEG    (DATA)
-_key_code_map::
-	.ds 16
 _key_sta::
 	.ds 16
 _key_action_show_num_65536_18:
@@ -283,6 +281,8 @@ _key_driver_back_up_65536_27:
 _key_driver_i_65536_27:
 	.ds 1
 _key_driver_j_65536_27:
+	.ds 1
+_key_driver_sloc0_1_0:
 	.ds 1
 _key_scan_key_out_65536_34:
 	.ds 1
@@ -354,6 +354,7 @@ _key_scan_key_buf_65536_34:
 ;back_up                   Allocated with name '_key_driver_back_up_65536_27'
 ;i                         Allocated with name '_key_driver_i_65536_27'
 ;j                         Allocated with name '_key_driver_j_65536_27'
+;sloc0                     Allocated with name '_key_driver_sloc0_1_0'
 ;------------------------------------------------------------
 ;	key.c:57: static unsigned char back_up[4][4] = { /* 按键值备份，保留前一次的值 */
 	mov	_key_driver_back_up_65536_27,#0x01
@@ -398,23 +399,6 @@ _key_scan_key_buf_65536_34:
 	mov	(_key_scan_key_buf_65536_34 + 0x000d),#0xff
 	mov	(_key_scan_key_buf_65536_34 + 0x000e),#0xff
 	mov	(_key_scan_key_buf_65536_34 + 0x000f),#0xff
-;	key.c:6: unsigned char key_code_map[4][4] = {
-	mov	_key_code_map,#0x31
-	mov	(_key_code_map + 0x0001),#0x32
-	mov	(_key_code_map + 0x0002),#0x33
-	mov	(_key_code_map + 0x0003),#0x24
-	mov	(_key_code_map + 0x0004),#0x34
-	mov	(_key_code_map + 0x0005),#0x35
-	mov	(_key_code_map + 0x0006),#0x36
-	mov	(_key_code_map + 0x0007),#0x25
-	mov	(_key_code_map + 0x0008),#0x37
-	mov	(_key_code_map + 0x0009),#0x38
-	mov	(_key_code_map + 0x000a),#0x39
-	mov	(_key_code_map + 0x000b),#0x28
-	mov	(_key_code_map + 0x000c),#0x30
-	mov	(_key_code_map + 0x000d),#0x1b
-	mov	(_key_code_map + 0x000e),#0x0d
-	mov	(_key_code_map + 0x000f),#0x27
 ;	key.c:13: unsigned char key_sta[4][4] = { /* 全部矩阵按键的当前状态 */
 	mov	_key_sta,#0x01
 	mov	(_key_sta + 0x0001),#0x01
@@ -552,6 +536,7 @@ _key_action:
 ;back_up                   Allocated with name '_key_driver_back_up_65536_27'
 ;i                         Allocated with name '_key_driver_i_65536_27'
 ;j                         Allocated with name '_key_driver_j_65536_27'
+;sloc0                     Allocated with name '_key_driver_sloc0_1_0'
 ;------------------------------------------------------------
 ;	key.c:54: void key_driver(void)
 ;	-----------------------------------------
@@ -563,59 +548,76 @@ _key_driver:
 ;	key.c:63: for (j = 0; j < 4; j++)
 00115$:
 	mov	a,_key_driver_i_65536_27
+	mov	b,#0x04
+	mul	ab
+	add	a,#_key_code_map
+	mov	r5,a
+	mov	a,#(_key_code_map >> 8)
+	addc	a,b
+	mov	r6,a
+	mov	a,_key_driver_i_65536_27
 	add	a,_key_driver_i_65536_27
 	add	a,acc
-	mov	r6,a
-	mov	r5,a
-	add	a,#_key_driver_back_up_65536_27
 	mov	r4,a
-	mov	a,r6
-	add	a,#_key_sta
 	mov	r3,a
+	add	a,#_key_driver_back_up_65536_27
+	mov	r2,a
+	mov	a,r4
+	add	a,#_key_sta
+	mov	_key_driver_sloc0_1_0,a
 	mov	_key_driver_j_65536_27,#0x00
 00107$:
 ;	key.c:65: if (back_up[i][j] != key_sta[i][j])
+	push	ar3
 	mov	a,_key_driver_j_65536_27
-	add	a,r4
+	add	a,r2
 	mov	r1,a
 	mov	a,_key_driver_j_65536_27
-	add	a,r3
+	add	a,_key_driver_sloc0_1_0
 	mov	r0,a
 	mov	ar7,@r1
-	mov	ar2,@r0
+	mov	ar3,@r0
 	mov	a,r7
-	cjne	a,ar2,00135$
+	cjne	a,ar3,00135$
+	pop	ar3
 	sjmp	00104$
 00135$:
+	pop	ar3
 ;	key.c:67: if (key_sta[i][j] == 1)
-	mov	a,r5
+	mov	a,r3
 	add	a,#_key_sta
 	add	a,_key_driver_j_65536_27
 	mov	r1,a
 	mov	ar7,@r1
 	cjne	r7,#0x01,00104$
 ;	key.c:68: key_action(key_code_map[i][j]);
-	mov	a,r5
-	add	a,#_key_code_map
-	add	a,_key_driver_j_65536_27
-	mov	r1,a
-	mov	dpl,@r1
+	mov	a,_key_driver_j_65536_27
+	add	a,r5
+	mov	dpl,a
+	clr	a
+	addc	a,r6
+	mov	dph,a
+	clr	a
+	movc	a,@a+dptr
+	mov	dpl,a
 	push	ar6
 	push	ar5
 	push	ar4
 	push	ar3
+	push	ar2
 	lcall	_key_action
+	pop	ar2
 	pop	ar3
 	pop	ar4
 	pop	ar5
 	pop	ar6
 00104$:
 ;	key.c:70: back_up[i][j] = key_sta[i][j];
-	mov	a,r6
+	mov	a,r4
 	add	a,#_key_driver_back_up_65536_27
 	add	a,_key_driver_j_65536_27
 	mov	r1,a
-	mov	a,r6
+	mov	a,r4
 	add	a,#_key_sta
 	add	a,_key_driver_j_65536_27
 	mov	r0,a
@@ -807,6 +809,23 @@ _key_scan:
 	ret
 	.area CSEG    (CODE)
 	.area CONST   (CODE)
+_key_code_map:
+	.db #0x31	; 49	'1'
+	.db #0x32	; 50	'2'
+	.db #0x33	; 51	'3'
+	.db #0x24	; 36
+	.db #0x34	; 52	'4'
+	.db #0x35	; 53	'5'
+	.db #0x36	; 54	'6'
+	.db #0x25	; 37
+	.db #0x37	; 55	'7'
+	.db #0x38	; 56	'8'
+	.db #0x39	; 57	'9'
+	.db #0x28	; 40
+	.db #0x30	; 48	'0'
+	.db #0x1b	; 27
+	.db #0x0d	; 13
+	.db #0x27	; 39
 ___str_0:
 	.ascii "123"
 	.db 0x00

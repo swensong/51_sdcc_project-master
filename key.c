@@ -3,7 +3,7 @@
 #include "i2c.h"
 #include "uart.h"
 
-unsigned char key_code_map[4][4] = {
+unsigned char __code key_code_map[4][4] = {
     { 0x31, 0x32, 0x33, 0x24 }, /* 数字键1, 数字键2, 数字键3, 向上键 */
     { 0x34, 0x35, 0x36, 0x25 }, /* 数字键4, 数字键5, 数字键6, 向左键 */
     { 0x37, 0x38, 0x39, 0x28 }, /* 数字键7, 数字键8, 数字键9, 向下键 */

@@ -11,7 +11,8 @@
 	.globl _interrupt_uart
 	.globl _interrupt_timer
 	.globl _main
-	.globl _e2_read_byte
+	.globl _e2_read
+	.globl _e2_write
 	.globl _e2_write_byte
 	.globl _uart_scan
 	.globl _config_uart
@@ -298,9 +299,11 @@ bits:
 	.area DSEG    (DATA)
 _flag1s::
 	.ds 1
-_main_dat_str_65536_24:
+_main_dat_65536_26:
+	.ds 1
+_main_dat_str_65536_26:
 	.ds 4
-_interrupt_timer_cnt_65536_27:
+_interrupt_timer_cnt_65536_29:
 	.ds 2
 ;--------------------------------------------------------
 ; overlayable items in internal ram 
@@ -383,12 +386,12 @@ __interrupt_vect:
 ;------------------------------------------------------------
 ;Allocation info for local variables in function 'interrupt_timer'
 ;------------------------------------------------------------
-;cnt                       Allocated with name '_interrupt_timer_cnt_65536_27'
+;cnt                       Allocated with name '_interrupt_timer_cnt_65536_29'
 ;------------------------------------------------------------
-;	main.c:64: static int cnt = 0;
+;	main.c:67: static int cnt = 0;
 	clr	a
-	mov	_interrupt_timer_cnt_65536_27,a
-	mov	(_interrupt_timer_cnt_65536_27 + 1),a
+	mov	_interrupt_timer_cnt_65536_29,a
+	mov	(_interrupt_timer_cnt_65536_29 + 1),a
 ;	main.c:10: char flag1s = 0;
 	mov	_flag1s,#0x00
 	.area GSFINAL (CODE)
@@ -409,8 +412,8 @@ __sdcc_program_startup:
 ;Allocation info for local variables in function 'main'
 ;------------------------------------------------------------
 ;cnt                       Allocated to registers 
-;dat                       Allocated to registers 
-;dat_str                   Allocated with name '_main_dat_str_65536_24'
+;dat                       Allocated with name '_main_dat_65536_26'
+;dat_str                   Allocated with name '_main_dat_str_65536_26'
 ;------------------------------------------------------------
 ;	main.c:16: void main(void)
 ;	-----------------------------------------
@@ -426,10 +429,10 @@ _main:
 	ar1 = 0x01
 	ar0 = 0x00
 ;	main.c:21: unsigned char dat_str[4] = "123";
-	mov	_main_dat_str_65536_24,#0x31
-	mov	(_main_dat_str_65536_24 + 0x0001),#0x32
-	mov	(_main_dat_str_65536_24 + 0x0002),#0x33
-	mov	(_main_dat_str_65536_24 + 0x0003),#0x00
+	mov	_main_dat_str_65536_26,#0x31
+	mov	(_main_dat_str_65536_26 + 0x0001),#0x32
+	mov	(_main_dat_str_65536_26 + 0x0002),#0x33
+	mov	(_main_dat_str_65536_26 + 0x0003),#0x00
 ;	main.c:22: init_lcd1602();
 	lcall	_init_lcd1602
 ;	main.c:23: seg_init();
@@ -450,89 +453,49 @@ _main:
 	mov	_lcd_show_str_PARM_2,#0x01
 	mov	dpl,#0x00
 	lcall	_lcd_show_str
-;	main.c:31: dat = e2_read_byte(0x02);
-	mov	dpl,#0x02
-	lcall	_e2_read_byte
-	mov	r7,dpl
-;	main.c:32: dat_str[0] = (dat/100) + '0';
-	mov	ar5,r7
-	mov	r6,#0x00
-	mov	__divsint_PARM_2,#0x64
-;	1-genFromRTrack replaced	mov	(__divsint_PARM_2 + 1),#0x00
-	mov	(__divsint_PARM_2 + 1),r6
-	mov	dpl,r5
-	mov	dph,r6
-	push	ar7
-	push	ar6
-	push	ar5
-	lcall	__divsint
-	mov	r3,dpl
-	pop	ar5
-	pop	ar6
-	mov	a,#0x30
-	add	a,r3
-	mov	_main_dat_str_65536_24,a
-;	main.c:33: dat_str[1] = (dat/10%10) + '0';
-	mov	__divsint_PARM_2,#0x0a
-	mov	(__divsint_PARM_2 + 1),#0x00
-	mov	dpl,r5
-	mov	dph,r6
-	push	ar6
-	push	ar5
-	lcall	__divsint
-	mov	__modsint_PARM_2,#0x0a
-	mov	(__modsint_PARM_2 + 1),#0x00
-	lcall	__modsint
-	mov	r3,dpl
-	pop	ar5
-	pop	ar6
-	mov	a,#0x30
-	add	a,r3
-	mov	(_main_dat_str_65536_24 + 0x0001),a
-;	main.c:34: dat_str[2] = (dat%10) + '0';
-	mov	__modsint_PARM_2,#0x0a
-	mov	(__modsint_PARM_2 + 1),#0x00
-	mov	dpl,r5
-	mov	dph,r6
-	lcall	__modsint
-	mov	r5,dpl
-	mov	a,#0x30
-	add	a,r5
-	mov	(_main_dat_str_65536_24 + 0x0002),a
-;	main.c:35: dat_str[3] = '\0';
-	mov	(_main_dat_str_65536_24 + 0x0003),#0x00
-;	main.c:37: lcd_show_str(0, 0, dat_str);
-	mov	_lcd_show_str_PARM_3,#_main_dat_str_65536_24
+;	main.c:31: e2_write("831", 0x02, 3);
+	mov	_e2_write_PARM_2,#0x02
+	mov	_e2_write_PARM_3,#0x03
+	mov	dptr,#___str_2
+	mov	b,#0x80
+	lcall	_e2_write
+;	main.c:32: e2_read(dat_str, 0x02, 3);
+	mov	_e2_read_PARM_2,#0x02
+	mov	_e2_read_PARM_3,#0x03
+	mov	dptr,#_main_dat_str_65536_26
+	mov	b,#0x40
+	lcall	_e2_read
+;	main.c:40: lcd_show_str(0, 0, dat_str);
+	mov	_lcd_show_str_PARM_3,#_main_dat_str_65536_26
 	mov	(_lcd_show_str_PARM_3 + 1),#0x00
 	mov	(_lcd_show_str_PARM_3 + 2),#0x40
 	mov	_lcd_show_str_PARM_2,#0x00
 	mov	dpl,#0x00
 	lcall	_lcd_show_str
-	pop	ar7
-;	main.c:38: dat++;
-	mov	a,r7
+;	main.c:41: dat++;
+	clr	a
 	inc	a
 	mov	_e2_write_byte_PARM_2,a
-;	main.c:39: e2_write_byte(0x02, dat);
+;	main.c:42: e2_write_byte(0x02, dat);
 	mov	dpl,#0x02
 	lcall	_e2_write_byte
-;	main.c:42: while (1)
+;	main.c:45: while (1)
 00104$:
-;	main.c:44: key_driver();
+;	main.c:47: key_driver();
 	lcall	_key_driver
-;	main.c:45: if (flag1s == 1)
+;	main.c:48: if (flag1s == 1)
 	mov	a,#0x01
 	cjne	a,_flag1s,00104$
-;	main.c:47: flag1s = 0;
+;	main.c:50: flag1s = 0;
 	mov	_flag1s,#0x00
-;	main.c:60: }
+;	main.c:63: }
 	sjmp	00104$
 ;------------------------------------------------------------
 ;Allocation info for local variables in function 'interrupt_timer'
 ;------------------------------------------------------------
-;cnt                       Allocated with name '_interrupt_timer_cnt_65536_27'
+;cnt                       Allocated with name '_interrupt_timer_cnt_65536_29'
 ;------------------------------------------------------------
-;	main.c:62: void interrupt_timer() __interrupt 1
+;	main.c:65: void interrupt_timer() __interrupt 1
 ;	-----------------------------------------
 ;	 function interrupt_timer
 ;	-----------------------------------------
@@ -552,23 +515,23 @@ _interrupt_timer:
 	push	(0+0)
 	push	psw
 	mov	psw,#0x00
-;	main.c:66: TH0 = T0RH;
+;	main.c:69: TH0 = T0RH;
 	mov	_TH0,_T0RH
-;	main.c:67: TL0 = T0RL;
+;	main.c:70: TL0 = T0RL;
 	mov	_TL0,_T0RL
-;	main.c:69: key_scan();
+;	main.c:72: key_scan();
 	lcall	_key_scan
-;	main.c:70: seg_index();
+;	main.c:73: seg_index();
 	lcall	_seg_index
-;	main.c:71: motor_scan();
+;	main.c:74: motor_scan();
 	lcall	_motor_scan
-;	main.c:73: if (cnt++ >= 1000)
-	mov	r6,_interrupt_timer_cnt_65536_27
-	mov	r7,(_interrupt_timer_cnt_65536_27 + 1)
-	inc	_interrupt_timer_cnt_65536_27
+;	main.c:76: if (cnt++ >= 1000)
+	mov	r6,_interrupt_timer_cnt_65536_29
+	mov	r7,(_interrupt_timer_cnt_65536_29 + 1)
+	inc	_interrupt_timer_cnt_65536_29
 	clr	a
-	cjne	a,_interrupt_timer_cnt_65536_27,00109$
-	inc	(_interrupt_timer_cnt_65536_27 + 1)
+	cjne	a,_interrupt_timer_cnt_65536_29,00109$
+	inc	(_interrupt_timer_cnt_65536_29 + 1)
 00109$:
 	clr	c
 	mov	a,r6
@@ -577,14 +540,14 @@ _interrupt_timer:
 	xrl	a,#0x80
 	subb	a,#0x83
 	jc	00103$
-;	main.c:75: cnt = 0;
+;	main.c:78: cnt = 0;
 	clr	a
-	mov	_interrupt_timer_cnt_65536_27,a
-	mov	(_interrupt_timer_cnt_65536_27 + 1),a
-;	main.c:76: flag1s = 1;
+	mov	_interrupt_timer_cnt_65536_29,a
+	mov	(_interrupt_timer_cnt_65536_29 + 1),a
+;	main.c:79: flag1s = 1;
 	mov	_flag1s,#0x01
 00103$:
-;	main.c:79: }
+;	main.c:82: }
 	pop	psw
 	pop	(0+0)
 	pop	(0+1)
@@ -603,7 +566,7 @@ _interrupt_timer:
 ;------------------------------------------------------------
 ;Allocation info for local variables in function 'interrupt_uart'
 ;------------------------------------------------------------
-;	main.c:81: void interrupt_uart() __interrupt 4
+;	main.c:84: void interrupt_uart() __interrupt 4
 ;	-----------------------------------------
 ;	 function interrupt_uart
 ;	-----------------------------------------
@@ -623,9 +586,9 @@ _interrupt_uart:
 	push	(0+0)
 	push	psw
 	mov	psw,#0x00
-;	main.c:83: uart_scan();
+;	main.c:86: uart_scan();
 	lcall	_uart_scan
-;	main.c:84: }
+;	main.c:87: }
 	pop	psw
 	pop	(0+0)
 	pop	(0+1)
@@ -648,14 +611,14 @@ _interrupt_uart:
 ;i                         Allocated to registers r4 r5 
 ;j                         Allocated to registers r2 r3 
 ;------------------------------------------------------------
-;	main.c:89: void delay_ms(int xms)
+;	main.c:92: void delay_ms(int xms)
 ;	-----------------------------------------
 ;	 function delay_ms
 ;	-----------------------------------------
 _delay_ms:
 	mov	r6,dpl
 	mov	r7,dph
-;	main.c:93: for (i = 0; i < xms; i++)
+;	main.c:96: for (i = 0; i < xms; i++)
 	mov	r4,#0x00
 	mov	r5,#0x00
 00107$:
@@ -668,7 +631,7 @@ _delay_ms:
 	xrl	b,#0x80
 	subb	a,b
 	jnc	00109$
-;	main.c:95: for (j = 0; j < 110; j++);
+;	main.c:98: for (j = 0; j < 110; j++);
 	mov	r2,#0x6e
 	mov	r3,#0x00
 00105$:
@@ -683,18 +646,21 @@ _delay_ms:
 	mov	a,r0
 	orl	a,r1
 	jnz	00105$
-;	main.c:93: for (i = 0; i < xms; i++)
+;	main.c:96: for (i = 0; i < xms; i++)
 	inc	r4
 	cjne	r4,#0x00,00107$
 	inc	r5
 	sjmp	00107$
 00109$:
-;	main.c:97: }
+;	main.c:100: }
 	ret
 	.area CSEG    (CODE)
 	.area CONST   (CODE)
 ___str_1:
 	.ascii "hello world!"
+	.db 0x00
+___str_2:
+	.ascii "831"
 	.db 0x00
 	.area XINIT   (CODE)
 	.area CABS    (ABS,CODE)

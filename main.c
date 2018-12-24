@@ -28,11 +28,14 @@ void main(void)
     /* lcd_show_str(0, 0, "hello world!"); */
     lcd_show_str(0, 1, "hello world!");
 
-    dat = e2_read_byte(0x02);
-    dat_str[0] = (dat/100) + '0';
-    dat_str[1] = (dat/10%10) + '0';
-    dat_str[2] = (dat%10) + '0';
-    dat_str[3] = '\0';
+    /* e2_write("831", 0x02, 3); */
+    /* e2_read(dat_str, 0x02, 3); */
+
+
+    /* dat_str[0] = (dat/100) + '0'; */
+    /* dat_str[1] = (dat/10%10) + '0'; */
+    /* dat_str[2] = (dat%10) + '0'; */
+    /* dat_str[3] = '\0'; */
 
     lcd_show_str(0, 0, dat_str);
     dat++;

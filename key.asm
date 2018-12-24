@@ -276,17 +276,17 @@ _key_code_map::
 	.ds 16
 _key_sta::
 	.ds 16
-_key_action_show_num_65536_16:
+_key_action_show_num_65536_18:
 	.ds 2
-_key_driver_back_up_65536_25:
+_key_driver_back_up_65536_27:
 	.ds 16
-_key_driver_i_65536_25:
+_key_driver_i_65536_27:
 	.ds 1
-_key_driver_j_65536_25:
+_key_driver_j_65536_27:
 	.ds 1
-_key_scan_key_out_65536_32:
+_key_scan_key_out_65536_34:
 	.ds 1
-_key_scan_key_buf_65536_32:
+_key_scan_key_buf_65536_34:
 	.ds 16
 ;--------------------------------------------------------
 ; overlayable items in internal ram 
@@ -341,63 +341,63 @@ _key_scan_key_buf_65536_32:
 ;------------------------------------------------------------
 ;Allocation info for local variables in function 'key_action'
 ;------------------------------------------------------------
-;show_num                  Allocated with name '_key_action_show_num_65536_16'
+;show_num                  Allocated with name '_key_action_show_num_65536_18'
 ;key_code                  Allocated to registers r7 
 ;------------------------------------------------------------
 ;	key.c:19: static unsigned int show_num = 0;
 	clr	a
-	mov	_key_action_show_num_65536_16,a
-	mov	(_key_action_show_num_65536_16 + 1),a
+	mov	_key_action_show_num_65536_18,a
+	mov	(_key_action_show_num_65536_18 + 1),a
 ;------------------------------------------------------------
 ;Allocation info for local variables in function 'key_driver'
 ;------------------------------------------------------------
-;back_up                   Allocated with name '_key_driver_back_up_65536_25'
-;i                         Allocated with name '_key_driver_i_65536_25'
-;j                         Allocated with name '_key_driver_j_65536_25'
+;back_up                   Allocated with name '_key_driver_back_up_65536_27'
+;i                         Allocated with name '_key_driver_i_65536_27'
+;j                         Allocated with name '_key_driver_j_65536_27'
 ;------------------------------------------------------------
 ;	key.c:57: static unsigned char back_up[4][4] = { /* 按键值备份，保留前一次的值 */
-	mov	_key_driver_back_up_65536_25,#0x01
-	mov	(_key_driver_back_up_65536_25 + 0x0001),#0x01
-	mov	(_key_driver_back_up_65536_25 + 0x0002),#0x01
-	mov	(_key_driver_back_up_65536_25 + 0x0003),#0x01
-	mov	(_key_driver_back_up_65536_25 + 0x0004),#0x01
-	mov	(_key_driver_back_up_65536_25 + 0x0005),#0x01
-	mov	(_key_driver_back_up_65536_25 + 0x0006),#0x01
-	mov	(_key_driver_back_up_65536_25 + 0x0007),#0x01
-	mov	(_key_driver_back_up_65536_25 + 0x0008),#0x01
-	mov	(_key_driver_back_up_65536_25 + 0x0009),#0x01
-	mov	(_key_driver_back_up_65536_25 + 0x000a),#0x01
-	mov	(_key_driver_back_up_65536_25 + 0x000b),#0x01
-	mov	(_key_driver_back_up_65536_25 + 0x000c),#0x01
-	mov	(_key_driver_back_up_65536_25 + 0x000d),#0x01
-	mov	(_key_driver_back_up_65536_25 + 0x000e),#0x01
-	mov	(_key_driver_back_up_65536_25 + 0x000f),#0x01
+	mov	_key_driver_back_up_65536_27,#0x01
+	mov	(_key_driver_back_up_65536_27 + 0x0001),#0x01
+	mov	(_key_driver_back_up_65536_27 + 0x0002),#0x01
+	mov	(_key_driver_back_up_65536_27 + 0x0003),#0x01
+	mov	(_key_driver_back_up_65536_27 + 0x0004),#0x01
+	mov	(_key_driver_back_up_65536_27 + 0x0005),#0x01
+	mov	(_key_driver_back_up_65536_27 + 0x0006),#0x01
+	mov	(_key_driver_back_up_65536_27 + 0x0007),#0x01
+	mov	(_key_driver_back_up_65536_27 + 0x0008),#0x01
+	mov	(_key_driver_back_up_65536_27 + 0x0009),#0x01
+	mov	(_key_driver_back_up_65536_27 + 0x000a),#0x01
+	mov	(_key_driver_back_up_65536_27 + 0x000b),#0x01
+	mov	(_key_driver_back_up_65536_27 + 0x000c),#0x01
+	mov	(_key_driver_back_up_65536_27 + 0x000d),#0x01
+	mov	(_key_driver_back_up_65536_27 + 0x000e),#0x01
+	mov	(_key_driver_back_up_65536_27 + 0x000f),#0x01
 ;------------------------------------------------------------
 ;Allocation info for local variables in function 'key_scan'
 ;------------------------------------------------------------
-;key_out                   Allocated with name '_key_scan_key_out_65536_32'
-;key_buf                   Allocated with name '_key_scan_key_buf_65536_32'
+;key_out                   Allocated with name '_key_scan_key_out_65536_34'
+;key_buf                   Allocated with name '_key_scan_key_buf_65536_34'
 ;i                         Allocated to registers r7 
 ;------------------------------------------------------------
 ;	key.c:78: static unsigned char key_out = 0;
-	mov	_key_scan_key_out_65536_32,#0x00
+	mov	_key_scan_key_out_65536_34,#0x00
 ;	key.c:79: static unsigned char key_buf[4][4] = {
-	mov	_key_scan_key_buf_65536_32,#0xff
-	mov	(_key_scan_key_buf_65536_32 + 0x0001),#0xff
-	mov	(_key_scan_key_buf_65536_32 + 0x0002),#0xff
-	mov	(_key_scan_key_buf_65536_32 + 0x0003),#0xff
-	mov	(_key_scan_key_buf_65536_32 + 0x0004),#0xff
-	mov	(_key_scan_key_buf_65536_32 + 0x0005),#0xff
-	mov	(_key_scan_key_buf_65536_32 + 0x0006),#0xff
-	mov	(_key_scan_key_buf_65536_32 + 0x0007),#0xff
-	mov	(_key_scan_key_buf_65536_32 + 0x0008),#0xff
-	mov	(_key_scan_key_buf_65536_32 + 0x0009),#0xff
-	mov	(_key_scan_key_buf_65536_32 + 0x000a),#0xff
-	mov	(_key_scan_key_buf_65536_32 + 0x000b),#0xff
-	mov	(_key_scan_key_buf_65536_32 + 0x000c),#0xff
-	mov	(_key_scan_key_buf_65536_32 + 0x000d),#0xff
-	mov	(_key_scan_key_buf_65536_32 + 0x000e),#0xff
-	mov	(_key_scan_key_buf_65536_32 + 0x000f),#0xff
+	mov	_key_scan_key_buf_65536_34,#0xff
+	mov	(_key_scan_key_buf_65536_34 + 0x0001),#0xff
+	mov	(_key_scan_key_buf_65536_34 + 0x0002),#0xff
+	mov	(_key_scan_key_buf_65536_34 + 0x0003),#0xff
+	mov	(_key_scan_key_buf_65536_34 + 0x0004),#0xff
+	mov	(_key_scan_key_buf_65536_34 + 0x0005),#0xff
+	mov	(_key_scan_key_buf_65536_34 + 0x0006),#0xff
+	mov	(_key_scan_key_buf_65536_34 + 0x0007),#0xff
+	mov	(_key_scan_key_buf_65536_34 + 0x0008),#0xff
+	mov	(_key_scan_key_buf_65536_34 + 0x0009),#0xff
+	mov	(_key_scan_key_buf_65536_34 + 0x000a),#0xff
+	mov	(_key_scan_key_buf_65536_34 + 0x000b),#0xff
+	mov	(_key_scan_key_buf_65536_34 + 0x000c),#0xff
+	mov	(_key_scan_key_buf_65536_34 + 0x000d),#0xff
+	mov	(_key_scan_key_buf_65536_34 + 0x000e),#0xff
+	mov	(_key_scan_key_buf_65536_34 + 0x000f),#0xff
 ;	key.c:6: unsigned char key_code_map[4][4] = {
 	mov	_key_code_map,#0x31
 	mov	(_key_code_map + 0x0001),#0x32
@@ -444,7 +444,7 @@ _key_scan_key_buf_65536_32:
 ;------------------------------------------------------------
 ;Allocation info for local variables in function 'key_action'
 ;------------------------------------------------------------
-;show_num                  Allocated with name '_key_action_show_num_65536_16'
+;show_num                  Allocated with name '_key_action_show_num_65536_18'
 ;key_code                  Allocated to registers r7 
 ;------------------------------------------------------------
 ;	key.c:17: void key_action(unsigned char key_code)
@@ -473,40 +473,40 @@ _key_action:
 	mov	r6,#0x00
 	mov	a,r5
 	add	a,#0xd0
-	mov	_key_action_show_num_65536_16,a
+	mov	_key_action_show_num_65536_18,a
 	mov	a,r6
 	addc	a,#0xff
-	mov	(_key_action_show_num_65536_16 + 1),a
+	mov	(_key_action_show_num_65536_18 + 1),a
 	ljmp	00120$
 00119$:
 ;	key.c:25: else if (key_code == 0x24)
 	cjne	r7,#0x24,00116$
 ;	key.c:27: show_num++;
-	inc	_key_action_show_num_65536_16
+	inc	_key_action_show_num_65536_18
 	clr	a
-	cjne	a,_key_action_show_num_65536_16,00161$
-	inc	(_key_action_show_num_65536_16 + 1)
+	cjne	a,_key_action_show_num_65536_18,00161$
+	inc	(_key_action_show_num_65536_18 + 1)
 00161$:
 	ljmp	00120$
 00116$:
 ;	key.c:29: else if (key_code == 0x25)
 	cjne	r7,#0x25,00113$
 ;	key.c:31: show_num = show_num*10;
-	mov	__mulint_PARM_2,_key_action_show_num_65536_16
-	mov	(__mulint_PARM_2 + 1),(_key_action_show_num_65536_16 + 1)
+	mov	__mulint_PARM_2,_key_action_show_num_65536_18
+	mov	(__mulint_PARM_2 + 1),(_key_action_show_num_65536_18 + 1)
 	mov	dptr,#0x000a
 	lcall	__mulint
-	mov	_key_action_show_num_65536_16,dpl
-	mov	(_key_action_show_num_65536_16 + 1),dph
+	mov	_key_action_show_num_65536_18,dpl
+	mov	(_key_action_show_num_65536_18 + 1),dph
 	sjmp	00120$
 00113$:
 ;	key.c:33: else if (key_code == 0x28)
 	cjne	r7,#0x28,00110$
 ;	key.c:35: show_num--;
-	dec	_key_action_show_num_65536_16
+	dec	_key_action_show_num_65536_18
 	mov	a,#0xff
-	cjne	a,_key_action_show_num_65536_16,00166$
-	dec	(_key_action_show_num_65536_16 + 1)
+	cjne	a,_key_action_show_num_65536_18,00166$
+	dec	(_key_action_show_num_65536_18 + 1)
 00166$:
 	sjmp	00120$
 00110$:
@@ -515,26 +515,26 @@ _key_action:
 ;	key.c:39: show_num = show_num/10;
 	mov	__divuint_PARM_2,#0x0a
 	mov	(__divuint_PARM_2 + 1),#0x00
-	mov	dpl,_key_action_show_num_65536_16
-	mov	dph,(_key_action_show_num_65536_16 + 1)
+	mov	dpl,_key_action_show_num_65536_18
+	mov	dph,(_key_action_show_num_65536_18 + 1)
 	lcall	__divuint
-	mov	_key_action_show_num_65536_16,dpl
-	mov	(_key_action_show_num_65536_16 + 1),dph
+	mov	_key_action_show_num_65536_18,dpl
+	mov	(_key_action_show_num_65536_18 + 1),dph
 	sjmp	00120$
 00107$:
 ;	key.c:41: else if (key_code == 0x0D)
 	cjne	r7,#0x0d,00104$
 ;	key.c:43: show_num = 5120;
-	mov	_key_action_show_num_65536_16,#0x00
-	mov	(_key_action_show_num_65536_16 + 1),#0x14
+	mov	_key_action_show_num_65536_18,#0x00
+	mov	(_key_action_show_num_65536_18 + 1),#0x14
 	sjmp	00120$
 00104$:
 ;	key.c:45: else if (key_code == 0x1B)  /* ESC按键，电机控制按键 */
 	cjne	r7,#0x1b,00120$
 ;	key.c:47: show_num = 0;
 	clr	a
-	mov	_key_action_show_num_65536_16,a
-	mov	(_key_action_show_num_65536_16 + 1),a
+	mov	_key_action_show_num_65536_18,a
+	mov	(_key_action_show_num_65536_18 + 1),a
 ;	key.c:48: uart_send("123", 3);
 	mov	_uart_send_PARM_2,#0x03
 	mov	dptr,#___str_0
@@ -542,16 +542,16 @@ _key_action:
 	lcall	_uart_send
 00120$:
 ;	key.c:51: seg_show_num(show_num);
-	mov	dpl,_key_action_show_num_65536_16
-	mov	dph,(_key_action_show_num_65536_16 + 1)
+	mov	dpl,_key_action_show_num_65536_18
+	mov	dph,(_key_action_show_num_65536_18 + 1)
 ;	key.c:52: }
 	ljmp	_seg_show_num
 ;------------------------------------------------------------
 ;Allocation info for local variables in function 'key_driver'
 ;------------------------------------------------------------
-;back_up                   Allocated with name '_key_driver_back_up_65536_25'
-;i                         Allocated with name '_key_driver_i_65536_25'
-;j                         Allocated with name '_key_driver_j_65536_25'
+;back_up                   Allocated with name '_key_driver_back_up_65536_27'
+;i                         Allocated with name '_key_driver_i_65536_27'
+;j                         Allocated with name '_key_driver_j_65536_27'
 ;------------------------------------------------------------
 ;	key.c:54: void key_driver(void)
 ;	-----------------------------------------
@@ -559,26 +559,26 @@ _key_action:
 ;	-----------------------------------------
 _key_driver:
 ;	key.c:61: for (i = 0; i < 4; i++)
-	mov	_key_driver_i_65536_25,#0x00
+	mov	_key_driver_i_65536_27,#0x00
 ;	key.c:63: for (j = 0; j < 4; j++)
 00115$:
-	mov	a,_key_driver_i_65536_25
-	add	a,_key_driver_i_65536_25
+	mov	a,_key_driver_i_65536_27
+	add	a,_key_driver_i_65536_27
 	add	a,acc
 	mov	r6,a
 	mov	r5,a
-	add	a,#_key_driver_back_up_65536_25
+	add	a,#_key_driver_back_up_65536_27
 	mov	r4,a
 	mov	a,r6
 	add	a,#_key_sta
 	mov	r3,a
-	mov	_key_driver_j_65536_25,#0x00
+	mov	_key_driver_j_65536_27,#0x00
 00107$:
 ;	key.c:65: if (back_up[i][j] != key_sta[i][j])
-	mov	a,_key_driver_j_65536_25
+	mov	a,_key_driver_j_65536_27
 	add	a,r4
 	mov	r1,a
-	mov	a,_key_driver_j_65536_25
+	mov	a,_key_driver_j_65536_27
 	add	a,r3
 	mov	r0,a
 	mov	ar7,@r1
@@ -590,14 +590,14 @@ _key_driver:
 ;	key.c:67: if (key_sta[i][j] == 1)
 	mov	a,r5
 	add	a,#_key_sta
-	add	a,_key_driver_j_65536_25
+	add	a,_key_driver_j_65536_27
 	mov	r1,a
 	mov	ar7,@r1
 	cjne	r7,#0x01,00104$
 ;	key.c:68: key_action(key_code_map[i][j]);
 	mov	a,r5
 	add	a,#_key_code_map
-	add	a,_key_driver_j_65536_25
+	add	a,_key_driver_j_65536_27
 	mov	r1,a
 	mov	dpl,@r1
 	push	ar6
@@ -612,24 +612,24 @@ _key_driver:
 00104$:
 ;	key.c:70: back_up[i][j] = key_sta[i][j];
 	mov	a,r6
-	add	a,#_key_driver_back_up_65536_25
-	add	a,_key_driver_j_65536_25
+	add	a,#_key_driver_back_up_65536_27
+	add	a,_key_driver_j_65536_27
 	mov	r1,a
 	mov	a,r6
 	add	a,#_key_sta
-	add	a,_key_driver_j_65536_25
+	add	a,_key_driver_j_65536_27
 	mov	r0,a
 	mov	ar7,@r0
 	mov	@r1,ar7
 ;	key.c:63: for (j = 0; j < 4; j++)
-	inc	_key_driver_j_65536_25
+	inc	_key_driver_j_65536_27
 	mov	a,#0x100 - 0x04
-	add	a,_key_driver_j_65536_25
+	add	a,_key_driver_j_65536_27
 	jnc	00107$
 ;	key.c:61: for (i = 0; i < 4; i++)
-	inc	_key_driver_i_65536_25
+	inc	_key_driver_i_65536_27
 	mov	a,#0x100 - 0x04
-	add	a,_key_driver_i_65536_25
+	add	a,_key_driver_i_65536_27
 	jc	00139$
 	ljmp	00115$
 00139$:
@@ -638,8 +638,8 @@ _key_driver:
 ;------------------------------------------------------------
 ;Allocation info for local variables in function 'key_scan'
 ;------------------------------------------------------------
-;key_out                   Allocated with name '_key_scan_key_out_65536_32'
-;key_buf                   Allocated with name '_key_scan_key_buf_65536_32'
+;key_out                   Allocated with name '_key_scan_key_out_65536_34'
+;key_buf                   Allocated with name '_key_scan_key_buf_65536_34'
 ;i                         Allocated to registers r7 
 ;------------------------------------------------------------
 ;	key.c:75: void key_scan(void)
@@ -648,10 +648,10 @@ _key_driver:
 ;	-----------------------------------------
 _key_scan:
 ;	key.c:85: key_buf[key_out][0] = (key_buf[key_out][0] << 1) | KEY_IN_1;
-	mov	a,_key_scan_key_out_65536_32
-	add	a,_key_scan_key_out_65536_32
+	mov	a,_key_scan_key_out_65536_34
+	add	a,_key_scan_key_out_65536_34
 	add	a,acc
-	add	a,#_key_scan_key_buf_65536_32
+	add	a,#_key_scan_key_buf_65536_34
 	mov	r1,a
 	mov	a,@r1
 	add	a,@r1
@@ -662,10 +662,10 @@ _key_scan:
 	orl	a,r7
 	mov	@r1,a
 ;	key.c:86: key_buf[key_out][1] = (key_buf[key_out][1] << 1) | KEY_IN_2;
-	mov	a,_key_scan_key_out_65536_32
-	add	a,_key_scan_key_out_65536_32
+	mov	a,_key_scan_key_out_65536_34
+	add	a,_key_scan_key_out_65536_34
 	add	a,acc
-	add	a,#_key_scan_key_buf_65536_32
+	add	a,#_key_scan_key_buf_65536_34
 	inc	a
 	mov	r1,a
 	mov	a,@r1
@@ -677,10 +677,10 @@ _key_scan:
 	orl	a,r7
 	mov	@r1,a
 ;	key.c:87: key_buf[key_out][2] = (key_buf[key_out][2] << 1) | KEY_IN_3;
-	mov	a,_key_scan_key_out_65536_32
-	add	a,_key_scan_key_out_65536_32
+	mov	a,_key_scan_key_out_65536_34
+	add	a,_key_scan_key_out_65536_34
 	add	a,acc
-	add	a,#_key_scan_key_buf_65536_32
+	add	a,#_key_scan_key_buf_65536_34
 	add	a,#0x02
 	mov	r1,a
 	mov	a,@r1
@@ -692,10 +692,10 @@ _key_scan:
 	orl	a,r7
 	mov	@r1,a
 ;	key.c:88: key_buf[key_out][3] = (key_buf[key_out][3] << 1) | KEY_IN_4;
-	mov	a,_key_scan_key_out_65536_32
-	add	a,_key_scan_key_out_65536_32
+	mov	a,_key_scan_key_out_65536_34
+	add	a,_key_scan_key_out_65536_34
 	add	a,acc
-	add	a,#_key_scan_key_buf_65536_32
+	add	a,#_key_scan_key_buf_65536_34
 	add	a,#0x03
 	mov	r1,a
 	mov	a,@r1
@@ -711,11 +711,11 @@ _key_scan:
 	mov	r7,#0x00
 00113$:
 ;	key.c:92: if ((key_buf[key_out][i] & 0x0F) == 0x00)
-	mov	a,_key_scan_key_out_65536_32
-	add	a,_key_scan_key_out_65536_32
+	mov	a,_key_scan_key_out_65536_34
+	add	a,_key_scan_key_out_65536_34
 	add	a,acc
 	mov	r6,a
-	add	a,#_key_scan_key_buf_65536_32
+	add	a,#_key_scan_key_buf_65536_34
 	add	a,r7
 	mov	r1,a
 	mov	a,@r1
@@ -735,7 +735,7 @@ _key_scan:
 00104$:
 ;	key.c:96: else if ((key_buf[key_out][i] & 0x0F) == 0x0F)
 	mov	a,r6
-	add	a,#_key_scan_key_buf_65536_32
+	add	a,#_key_scan_key_buf_65536_34
 	add	a,r7
 	mov	r1,a
 	mov	ar5,@r1
@@ -757,14 +757,14 @@ _key_scan:
 00142$:
 	jc	00113$
 ;	key.c:102: key_out++;
-	inc	_key_scan_key_out_65536_32
+	inc	_key_scan_key_out_65536_34
 ;	key.c:103: key_out = key_out & 0x03;
-	anl	_key_scan_key_out_65536_32,#0x03
+	anl	_key_scan_key_out_65536_34,#0x03
 ;	key.c:104: switch (key_out)
-	mov	a,_key_scan_key_out_65536_32
+	mov	a,_key_scan_key_out_65536_34
 	add	a,#0xff - 0x03
 	jc	00115$
-	mov	a,_key_scan_key_out_65536_32
+	mov	a,_key_scan_key_out_65536_34
 	mov	b,#0x03
 	mul	ab
 	mov	dptr,#00145$

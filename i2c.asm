@@ -131,11 +131,17 @@
 	.globl _DPL
 	.globl _SP
 	.globl _P0
+	.globl _e2_write_PARM_3
+	.globl _e2_write_PARM_2
+	.globl _e2_read_PARM_3
+	.globl _e2_read_PARM_2
 	.globl _e2_write_byte_PARM_2
 	.globl _i2c_read_nak
 	.globl _i2c_read_ack
 	.globl _e2_read_byte
 	.globl _e2_write_byte
+	.globl _e2_read
+	.globl _e2_write
 ;--------------------------------------------------------
 ; special function registers
 ;--------------------------------------------------------
@@ -274,11 +280,19 @@ _TF2	=	0x00cf
 ; internal ram data
 ;--------------------------------------------------------
 	.area DSEG    (DATA)
-_i2c_read_nak_dat_65536_25:
+_i2c_read_nak_dat_65536_27:
 	.ds 1
-_i2c_read_ack_dat_65536_33:
+_i2c_read_ack_dat_65536_35:
 	.ds 1
 _e2_write_byte_PARM_2:
+	.ds 1
+_e2_read_PARM_2:
+	.ds 1
+_e2_read_PARM_3:
+	.ds 1
+_e2_write_PARM_2:
+	.ds 1
+_e2_write_PARM_3:
 	.ds 1
 ;--------------------------------------------------------
 ; overlayable items in internal ram 
@@ -566,7 +580,7 @@ _i2c_write:
 ;Allocation info for local variables in function 'i2c_read_nak'
 ;------------------------------------------------------------
 ;mask                      Allocated to registers r7 
-;dat                       Allocated with name '_i2c_read_nak_dat_65536_25'
+;dat                       Allocated with name '_i2c_read_nak_dat_65536_27'
 ;------------------------------------------------------------
 ;	i2c.c:77: unsigned char i2c_read_nak(void)
 ;	-----------------------------------------
@@ -596,12 +610,12 @@ _i2c_read_nak:
 	mov	r6,dpl
 	pop	ar7
 	mov	a,r6
-	anl	_i2c_read_nak_dat_65536_25,a
+	anl	_i2c_read_nak_dat_65536_27,a
 	sjmp	00103$
 00102$:
 ;	i2c.c:90: dat |= mask;        /* 为1时，dat中对应位置1 */
 	mov	a,r7
-	orl	_i2c_read_nak_dat_65536_25,a
+	orl	_i2c_read_nak_dat_65536_27,a
 00103$:
 ;	i2c.c:91: I2CDelay();
 	nop	
@@ -637,14 +651,14 @@ _i2c_read_nak:
 ;	assignBit
 	clr	_P3_7
 ;	i2c.c:100: return dat;
-	mov	dpl,_i2c_read_nak_dat_65536_25
+	mov	dpl,_i2c_read_nak_dat_65536_27
 ;	i2c.c:101: }
 	ret
 ;------------------------------------------------------------
 ;Allocation info for local variables in function 'i2c_read_ack'
 ;------------------------------------------------------------
 ;mask                      Allocated to registers r7 
-;dat                       Allocated with name '_i2c_read_ack_dat_65536_33'
+;dat                       Allocated with name '_i2c_read_ack_dat_65536_35'
 ;------------------------------------------------------------
 ;	i2c.c:104: unsigned char i2c_read_ack(void)
 ;	-----------------------------------------
@@ -674,12 +688,12 @@ _i2c_read_ack:
 	mov	r6,dpl
 	pop	ar7
 	mov	a,r6
-	anl	_i2c_read_ack_dat_65536_33,a
+	anl	_i2c_read_ack_dat_65536_35,a
 	sjmp	00103$
 00102$:
 ;	i2c.c:117: dat |= mask;        /* 为1时，dat中对应位置1 */
 	mov	a,r7
-	orl	_i2c_read_ack_dat_65536_33,a
+	orl	_i2c_read_ack_dat_65536_35,a
 00103$:
 ;	i2c.c:118: I2CDelay();
 	nop	
@@ -715,7 +729,7 @@ _i2c_read_ack:
 ;	assignBit
 	clr	_P3_7
 ;	i2c.c:127: return dat;
-	mov	dpl,_i2c_read_ack_dat_65536_33
+	mov	dpl,_i2c_read_ack_dat_65536_35
 ;	i2c.c:128: }
 	ret
 ;------------------------------------------------------------
@@ -784,6 +798,190 @@ _e2_write_byte:
 ;	i2c.c:152: i2c_stop();
 ;	i2c.c:153: }
 	ljmp	_i2c_stop
+;------------------------------------------------------------
+;Allocation info for local variables in function 'e2_read'
+;------------------------------------------------------------
+;addr                      Allocated with name '_e2_read_PARM_2'
+;len                       Allocated with name '_e2_read_PARM_3'
+;buf                       Allocated to registers r5 r6 r7 
+;------------------------------------------------------------
+;	i2c.c:156: void e2_read(unsigned char *buf, unsigned char addr, unsigned char len)
+;	-----------------------------------------
+;	 function e2_read
+;	-----------------------------------------
+_e2_read:
+	mov	r5,dpl
+	mov	r6,dph
+	mov	r7,b
+;	i2c.c:158: do {                        /* 用寻址操作查询当前是否可进行读写操作 */
+00103$:
+;	i2c.c:159: i2c_start();
+	push	ar7
+	push	ar6
+	push	ar5
+	lcall	_i2c_start
+;	i2c.c:160: if (i2c_write(0x50 << 1)) /* 应答则跳出循环，非应答则进行下一次查询 */
+	mov	dpl,#0xa0
+	lcall	_i2c_write
+	mov	a,dpl
+	pop	ar5
+	pop	ar6
+	pop	ar7
+	jnz	00105$
+;	i2c.c:164: i2c_stop();
+	push	ar7
+	push	ar6
+	push	ar5
+	lcall	_i2c_stop
+	pop	ar5
+	pop	ar6
+	pop	ar7
+;	i2c.c:165: } while (1);
+	sjmp	00103$
+00105$:
+;	i2c.c:166: i2c_write(addr);            /* 写入起始地址 */
+	mov	dpl,_e2_read_PARM_2
+	push	ar7
+	push	ar6
+	push	ar5
+	lcall	_i2c_write
+;	i2c.c:167: i2c_start();                /* 发送重复启动信号 */
+	lcall	_i2c_start
+;	i2c.c:168: i2c_write((0x50 << 1) | 0x01); /* 寻址器件，后续为读信号 */
+	mov	dpl,#0xa1
+	lcall	_i2c_write
+	pop	ar5
+	pop	ar6
+	pop	ar7
+;	i2c.c:169: while (len > 1)                /* 连续读取len-1个字节 */
+	mov	r4,_e2_read_PARM_3
+00106$:
+	mov	a,r4
+	add	a,#0xff - 0x01
+	jnc	00108$
+;	i2c.c:171: *buf++ = i2c_read_ack(); /* 最后字节之前为读取操作+应答 */
+	push	ar7
+	push	ar6
+	push	ar5
+	push	ar4
+	lcall	_i2c_read_ack
+	mov	r3,dpl
+	pop	ar4
+	pop	ar5
+	pop	ar6
+	pop	ar7
+	mov	dpl,r5
+	mov	dph,r6
+	mov	b,r7
+	mov	a,r3
+	lcall	__gptrput
+	inc	dptr
+	mov	r5,dpl
+	mov	r6,dph
+;	i2c.c:172: len--;
+	dec	r4
+	sjmp	00106$
+00108$:
+;	i2c.c:174: *buf = i2c_read_nak();      /* 最后一个字节为读取操作+非应答 */
+	push	ar7
+	push	ar6
+	push	ar5
+	lcall	_i2c_read_nak
+	mov	r4,dpl
+	pop	ar5
+	pop	ar6
+	pop	ar7
+	mov	dpl,r5
+	mov	dph,r6
+	mov	b,r7
+	mov	a,r4
+	lcall	__gptrput
+;	i2c.c:175: i2c_stop();
+;	i2c.c:176: }
+	ljmp	_i2c_stop
+;------------------------------------------------------------
+;Allocation info for local variables in function 'e2_write'
+;------------------------------------------------------------
+;addr                      Allocated with name '_e2_write_PARM_2'
+;len                       Allocated with name '_e2_write_PARM_3'
+;buf                       Allocated to registers 
+;------------------------------------------------------------
+;	i2c.c:179: void e2_write(unsigned char *buf, unsigned char addr, unsigned char len)
+;	-----------------------------------------
+;	 function e2_write
+;	-----------------------------------------
+_e2_write:
+	mov	r5,dpl
+	mov	r6,dph
+	mov	r7,b
+;	i2c.c:181: while (len--)
+	mov	r4,_e2_write_PARM_2
+	mov	r3,_e2_write_PARM_3
+00106$:
+	mov	ar2,r3
+	dec	r3
+	mov	a,r2
+	jnz	00124$
+	ret
+00124$:
+;	i2c.c:183: do {                    /* 用寻址操作查询当前是否可进行读写操作 */
+00103$:
+;	i2c.c:184: i2c_start();
+	push	ar7
+	push	ar6
+	push	ar5
+	push	ar4
+	push	ar3
+	lcall	_i2c_start
+;	i2c.c:185: if (i2c_write(0x50 << 1)) /* 应答则跳出循环，非应答则进行下一次查询 */
+	mov	dpl,#0xa0
+	lcall	_i2c_write
+	mov	a,dpl
+	pop	ar3
+	pop	ar4
+	pop	ar5
+	pop	ar6
+	pop	ar7
+	jz	00103$
+;	i2c.c:190: i2c_write(addr++);      /* 写入起始地址 */
+	mov	dpl,r4
+	inc	r4
+	push	ar7
+	push	ar6
+	push	ar5
+	push	ar4
+	push	ar3
+	lcall	_i2c_write
+	pop	ar3
+	pop	ar4
+	pop	ar5
+	pop	ar6
+	pop	ar7
+;	i2c.c:191: i2c_write(*buf++);      /* 写入一个字节数据 */
+	mov	dpl,r5
+	mov	dph,r6
+	mov	b,r7
+	lcall	__gptrget
+	mov	r2,a
+	inc	dptr
+	mov	r5,dpl
+	mov	r6,dph
+	mov	dpl,r2
+	push	ar7
+	push	ar6
+	push	ar5
+	push	ar4
+	push	ar3
+	lcall	_i2c_write
+;	i2c.c:192: i2c_stop();             /* 结束写操作，以等待写入完成 */
+	lcall	_i2c_stop
+	pop	ar3
+	pop	ar4
+	pop	ar5
+	pop	ar6
+	pop	ar7
+;	i2c.c:194: }
+	ljmp	00106$
 	.area CSEG    (CODE)
 	.area CONST   (CODE)
 	.area XINIT   (CODE)

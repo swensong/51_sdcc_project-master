@@ -152,3 +152,43 @@ void e2_write_byte(unsigned char addr, unsigned char dat)
     i2c_stop();
 }
 
+/* E2读取函数，buf-源数据指针，addr-E2中的起始地址，len-写入长度 */
+void e2_read(unsigned char *buf, unsigned char addr, unsigned char len)
+{
+    do {                        /* 用寻址操作查询当前是否可进行读写操作 */
+        i2c_start();
+        if (i2c_write(0x50 << 1)) /* 应答则跳出循环，非应答则进行下一次查询 */
+        {
+            break;
+        }
+        i2c_stop();
+    } while (1);
+    i2c_write(addr);            /* 写入起始地址 */
+    i2c_start();                /* 发送重复启动信号 */
+    i2c_write((0x50 << 1) | 0x01); /* 寻址器件，后续为读信号 */
+    while (len > 1)                /* 连续读取len-1个字节 */
+    {
+        *buf++ = i2c_read_ack(); /* 最后字节之前为读取操作+应答 */
+        len--;
+    }
+    *buf = i2c_read_nak();      /* 最后一个字节为读取操作+非应答 */
+    i2c_stop();
+}
+
+/* E2写入函数，buf-源数据指针，addr-E2中的起始地址，len-写入长度 */
+void e2_write(unsigned char *buf, unsigned char addr, unsigned char len)
+{
+    while (len--)
+    {
+        do {                    /* 用寻址操作查询当前是否可进行读写操作 */
+            i2c_start();
+            if (i2c_write(0x50 << 1)) /* 应答则跳出循环，非应答则进行下一次查询 */
+            {
+                break;
+            }
+        } while (1);
+        i2c_write(addr++);      /* 写入起始地址 */
+        i2c_write(*buf++);      /* 写入一个字节数据 */
+        i2c_stop();             /* 结束写操作，以等待写入完成 */
+    }
+}

@@ -5,6 +5,7 @@
 #include "key.h"
 #include "motor.h"
 #include "uart.h"
+#include "i2c.h"
 
 char flag1s = 0;
 extern unsigned char T0RH;
@@ -16,6 +17,8 @@ void main(void)
 {
     /* led_init(HIGH); */
     char cnt = 0;
+    unsigned char dat;
+    unsigned char dat_str[4] = "123";
     init_lcd1602();
     seg_init();
     time0_init(1);
@@ -23,8 +26,18 @@ void main(void)
     EA = 1;
 
     /* lcd_show_str(0, 0, "hello world!"); */
-    delay_ms(100);
     lcd_show_str(0, 1, "hello world!");
+
+    dat = e2_read_byte(0x02);
+    dat_str[0] = (dat/100) + '0';
+    dat_str[1] = (dat/10%10) + '0';
+    dat_str[2] = (dat%10) + '0';
+    dat_str[3] = '\0';
+
+    lcd_show_str(0, 0, dat_str);
+    dat++;
+    e2_write_byte(0x02, dat);
+
 
     while (1)
     {

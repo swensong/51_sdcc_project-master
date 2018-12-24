@@ -1,5 +1,6 @@
 #include "key.h"
 #include "seg.h"
+#include "i2c.h"
 #include "uart.h"
 
 unsigned char key_code_map[4][4] = {

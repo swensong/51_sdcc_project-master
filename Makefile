@@ -37,8 +37,8 @@ main.bin : main.hex
 main.hex : main.ihx
 	$(PACKIHX) main.ihx > main.hex
 
-main.ihx : main.c led.rel time.rel seg.rel lcd1602.rel key.rel motor.rel uart.rel
-	$(CC) $(INC_FLAGS) $(CFLAGS) main.c led.rel time.rel seg.rel lcd1602.rel key.rel motor.rel uart.rel
+main.ihx : main.c led.rel time.rel seg.rel lcd1602.rel key.rel motor.rel uart.rel i2c.rel
+	$(CC) $(INC_FLAGS) $(CFLAGS) main.c led.rel time.rel seg.rel lcd1602.rel key.rel motor.rel uart.rel i2c.rel
 
 led.rel : led.c
 	$(CC) -c $(INC_FLAGS) $(CFLAGS) led.c
@@ -60,6 +60,9 @@ motor.rel : motor.c
 
 uart.rel : uart.c
 	$(CC) -c $(INC_FLAGS) $(CFLAGS) uart.c
+
+i2c.rel : i2c.c
+	$(CC) -c $(INC_FLAGS) $(CFLAGS) i2c.c
 
 .PHONY : clean update
 

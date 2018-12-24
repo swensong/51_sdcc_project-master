@@ -22,5 +22,6 @@ lcd1602.rel
 key.rel
 motor.rel
 uart.rel
+i2c.rel
 
 -e

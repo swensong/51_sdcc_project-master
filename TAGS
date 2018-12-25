@@ -1,4 +1,10 @@
 
+i2c.h,90
+#define _I2C_H2,15
+#define I2CDelay(7,70
+#define I2C_SCL 9,125
+#define I2C_SDA 10,146
+
 lcd1602.c,162
 void lcd_wait_ready(3,22
 void lcd_write_cmd(18,383
@@ -7,13 +13,49 @@ void lcd_set_cursor(40,876
 void lcd_show_str(52,1348
 void init_lcd1602(61,1672
 
-seg.c,161
-unsigned char led_char[led_char3,18
-unsigned char led_buff[led_buff8,193
-char i 12,335
-void seg_init(14,348
-void seg_driver(20,514
-void seg_index(30,786
+infrared.c,161
+unsigned char ir_flag 3,23
+unsigned char ir_code[ir_code4,114
+void init_infrared(7,215
+unsigned int get_high_time(19,701
+unsigned int get_low_time(37,1394
+
+.git/smartgit.config,16
+	converted 2,7
+
+motor.h,22
+#define _MOTOR_H2,17
+
+seg.c,229
+unsigned char __code led_char[led_char4,40
+unsigned char led_buff[led_buff9,222
+char i 13,364
+void seg_show_num(15,377
+void seg_init(24,629
+void seg_driver(30,795
+void seg_index(40,1067
+void seg_infrared_driver(58,1674
+
+ds1302.c,170
+void ds1302_byte_write(4,70
+unsigned char ds1302_byte_read(22,620
+void ds1302_single_write(41,1267
+unsigned char ds1302_single_read(51,1705
+void init_ds1302(64,2128
+
+key.h,217
+#define _KEY_H2,15
+#define KEY_IN_1 6,50
+#define KEY_IN_2 7,72
+#define KEY_IN_3 8,94
+#define KEY_IN_4 9,116
+#define KEY_OUT_1 10,138
+#define KEY_OUT_2 11,161
+#define KEY_OUT_3 12,184
+#define KEY_OUT_4 13,207
+
+uart.h,21
+#define _UART_H2,16
 
 led.c,20
 void led_init(3,18
@@ -36,11 +78,24 @@ led.h,335
 #define	HIGH	21,297
 #define	LOW	22,312
 
-stdint.h,118
+stdint.h,139
 #define __STDINT_H2,19
 typedef unsigned char u8;4,39
 typedef unsigned int u16;5,65
 typedef unsigned long u32;6,91
+#define _nop_(8,119
+
+i2c.c,303
+void i2c_start(3,18
+void i2c_stop(13,270
+unsigned char return_behind_data(24,537
+unsigned char i2c_write(46,1047
+unsigned char i2c_read_nak(77,2218
+unsigned char i2c_read_ack(104,3184
+unsigned char e2_read_byte(131,4130
+void e2_write_byte(146,4589
+void e2_read(156,4967
+void e2_write(179,5890
 
 seg.h,121
 #define ADDR0 5,35
@@ -50,8 +105,17 @@ seg.h,121
 #define LEDEN 9,111
 #define SEG	11,131
 
-time.c,26
-void base_time_init(3,19
+key.c,163
+unsigned char __code key_code_map[key_code_map6,70
+unsigned char key_sta[key_sta13,450
+void key_action(17,585
+void key_driver(54,1290
+void key_scan(75,1804
+
+time.c,72
+unsigned char T0RH 3,19
+unsigned char T0RL 4,43
+void time0_init(6,68
 
 lcd1602.h,125
 #define _LCD1602_H2,19
@@ -60,10 +124,38 @@ lcd1602.h,125
 #define LCD1602_RW 8,104
 #define LCD1602_E 9,128
 
-main.c,87
-char flag1s 6,74
-void main(10,117
-void interrupt_timer(41,661
-void delay_ms(61,873
+ds1302.h,96
+#define _DS1302_H2,18
+#define DS1302_CE 6,56
+#define DS1302_CK 7,79
+#define DS1302_IO 8,102
+
+infrared.h,68
+#define _INFRARED_H2,20
+#define IR_INPUT 6,60
+#define ENLED 7,83
+
+uart.c,69
+void config_uart(3,19
+void uart_send(15,205
+void uart_scan(25,438
+
+motor.c,139
+unsigned char beat_code[beat_code3,20
+unsigned long beats 7,147
+void start_motor(9,211
+void stop_motor(16,312
+void motor_scan(21,354
+
+main.c,169
+#define FLAG_TIME 11,170
+char flag1s 13,236
+void main(19,333
+void interrupt_timer(39,674
+void interrupt_uart(57,888
+void EXINT_ISR(63,1005
+void delay_ms(109,2696
+
+main.hex,0
 
 time.h,0

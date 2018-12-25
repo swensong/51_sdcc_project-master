@@ -18,11 +18,6 @@ main.rel
 led.rel
 time.rel
 seg.rel
-lcd1602.rel
-key.rel
-motor.rel
-uart.rel
-i2c.rel
-ds1302.rel
+infrared.rel
 
 -e

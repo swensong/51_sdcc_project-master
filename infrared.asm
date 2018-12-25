@@ -2,23 +2,12 @@
 ; File Created by SDCC : free open source ANSI-C Compiler
 ; Version 3.8.0 #10562 (Linux)
 ;--------------------------------------------------------
-	.module main
+	.module infrared
 	.optsdcc -mmcs51 --model-small
 	
 ;--------------------------------------------------------
 ; Public variables in this module
 ;--------------------------------------------------------
-	.globl _EXINT_ISR
-	.globl _interrupt_timer
-	.globl _main
-	.globl _get_low_time
-	.globl _get_high_time
-	.globl _init_infrared
-	.globl _time0_init
-	.globl _seg_infrared_driver
-	.globl _seg_show_num
-	.globl _seg_index
-	.globl _seg_init
 	.globl _TF2
 	.globl _EXF2
 	.globl _RCLK
@@ -138,6 +127,11 @@
 	.globl _DPL
 	.globl _SP
 	.globl _P0
+	.globl _ir_code
+	.globl _ir_flag
+	.globl _init_infrared
+	.globl _get_high_time
+	.globl _get_low_time
 ;--------------------------------------------------------
 ; special function registers
 ;--------------------------------------------------------
@@ -273,35 +267,16 @@ _TF2	=	0x00cf
 	.area REG_BANK_0	(REL,OVR,DATA)
 	.ds 8
 ;--------------------------------------------------------
-; overlayable bit register bank
-;--------------------------------------------------------
-	.area BIT_BANK	(REL,OVR,DATA)
-bits:
-	.ds 1
-	b0 = bits[0]
-	b1 = bits[1]
-	b2 = bits[2]
-	b3 = bits[3]
-	b4 = bits[4]
-	b5 = bits[5]
-	b6 = bits[6]
-	b7 = bits[7]
-;--------------------------------------------------------
 ; internal ram data
 ;--------------------------------------------------------
 	.area DSEG    (DATA)
-_EXINT_ISR_sloc0_1_0:
+_ir_flag::
 	.ds 1
+_ir_code::
+	.ds 4
 ;--------------------------------------------------------
 ; overlayable items in internal ram 
 ;--------------------------------------------------------
-;--------------------------------------------------------
-; Stack segment in internal ram 
-;--------------------------------------------------------
-	.area	SSEG
-__start__stack:
-	.ds	1
-
 ;--------------------------------------------------------
 ; indirectly addressable internal ram data
 ;--------------------------------------------------------
@@ -342,51 +317,31 @@ __start__stack:
 	.area GSFINAL (CODE)
 	.area CSEG    (CODE)
 ;--------------------------------------------------------
-; interrupt vector 
-;--------------------------------------------------------
-	.area HOME    (CODE)
-__interrupt_vect:
-	ljmp	__sdcc_gsinit_startup
-	reti
-	.ds	7
-	ljmp	_interrupt_timer
-	.ds	5
-	ljmp	_EXINT_ISR
-;--------------------------------------------------------
 ; global & static initialisations
 ;--------------------------------------------------------
 	.area HOME    (CODE)
 	.area GSINIT  (CODE)
 	.area GSFINAL (CODE)
 	.area GSINIT  (CODE)
-	.globl __sdcc_gsinit_startup
-	.globl __sdcc_program_startup
-	.globl __start__stack
-	.globl __mcs51_genXINIT
-	.globl __mcs51_genXRAMCLEAR
-	.globl __mcs51_genRAMCLEAR
-	.area GSFINAL (CODE)
-	ljmp	__sdcc_program_startup
+;	infrared.c:3: unsigned char ir_flag = 0;      /* 红外接受标志，收到一段正确数据后置1 */
+	mov	_ir_flag,#0x00
 ;--------------------------------------------------------
 ; Home
 ;--------------------------------------------------------
 	.area HOME    (CODE)
 	.area HOME    (CODE)
-__sdcc_program_startup:
-	ljmp	_main
-;	return from main will return to caller
 ;--------------------------------------------------------
 ; code
 ;--------------------------------------------------------
 	.area CSEG    (CODE)
 ;------------------------------------------------------------
-;Allocation info for local variables in function 'main'
+;Allocation info for local variables in function 'init_infrared'
 ;------------------------------------------------------------
-;	main.c:6: void main(void)
+;	infrared.c:7: void init_infrared(void)
 ;	-----------------------------------------
-;	 function main
+;	 function init_infrared
 ;	-----------------------------------------
-_main:
+_init_infrared:
 	ar7 = 0x07
 	ar6 = 0x06
 	ar5 = 0x05
@@ -395,275 +350,109 @@ _main:
 	ar2 = 0x02
 	ar1 = 0x01
 	ar0 = 0x00
-;	main.c:8: seg_init();
-	lcall	_seg_init
-;	main.c:9: time0_init(1);
-	mov	dptr,#0x0001
-	lcall	_time0_init
-;	main.c:10: init_infrared();
-	lcall	_init_infrared
-;	main.c:11: EA = 1;
+;	infrared.c:9: IR_INPUT = 1;               /* 确保红外接收引脚被释放 */
 ;	assignBit
-	setb	_EA
-;	main.c:13: seg_show_num(25536);
-	mov	dptr,#0x63c0
-	lcall	_seg_show_num
-;	main.c:15: while (1)
-00102$:
-;	main.c:17: seg_infrared_driver();
-	lcall	_seg_infrared_driver
-;	main.c:19: }
-	sjmp	00102$
-;------------------------------------------------------------
-;Allocation info for local variables in function 'interrupt_timer'
-;------------------------------------------------------------
-;	main.c:21: void interrupt_timer() __interrupt 1
-;	-----------------------------------------
-;	 function interrupt_timer
-;	-----------------------------------------
-_interrupt_timer:
-	push	bits
-	push	acc
-	push	b
-	push	dpl
-	push	dph
-	push	(0+7)
-	push	(0+6)
-	push	(0+5)
-	push	(0+4)
-	push	(0+3)
-	push	(0+2)
-	push	(0+1)
-	push	(0+0)
-	push	psw
-	mov	psw,#0x00
-;	main.c:23: TH0 = T0RH;
-	mov	_TH0,_T0RH
-;	main.c:24: TL0 = T0RL;
-	mov	_TL0,_T0RL
-;	main.c:26: seg_index();
-	lcall	_seg_index
-;	main.c:27: }
-	pop	psw
-	pop	(0+0)
-	pop	(0+1)
-	pop	(0+2)
-	pop	(0+3)
-	pop	(0+4)
-	pop	(0+5)
-	pop	(0+6)
-	pop	(0+7)
-	pop	dph
-	pop	dpl
-	pop	b
-	pop	acc
-	pop	bits
-	reti
-;------------------------------------------------------------
-;Allocation info for local variables in function 'EXINT_ISR'
-;------------------------------------------------------------
-;i                         Allocated to registers r7 
-;j                         Allocated to registers r6 
-;byt                       Allocated to registers r5 
-;time                      Allocated to registers r4 r5 
-;sloc0                     Allocated with name '_EXINT_ISR_sloc0_1_0'
-;------------------------------------------------------------
-;	main.c:30: void EXINT_ISR() __interrupt 2
-;	-----------------------------------------
-;	 function EXINT_ISR
-;	-----------------------------------------
-_EXINT_ISR:
-	push	bits
-	push	acc
-	push	b
-	push	dpl
-	push	dph
-	push	(0+7)
-	push	(0+6)
-	push	(0+5)
-	push	(0+4)
-	push	(0+3)
-	push	(0+2)
-	push	(0+1)
-	push	(0+0)
-	push	psw
-	mov	psw,#0x00
-;	main.c:37: time = get_low_time();
-	lcall	_get_low_time
-	mov	r6,dpl
-	mov	r7,dph
-;	main.c:38: if ((time < 7833) || (time > 8755)) /* 时间判定范围为8.5～9.5ms, */
-	clr	c
-	mov	a,r6
-	subb	a,#0x99
-	mov	a,r7
-	subb	a,#0x1e
-	jc	00101$
-	mov	a,#0x33
-	subb	a,r6
-	mov	a,#0x22
-	subb	a,r7
-	jnc	00102$
-00101$:
-;	main.c:40: IE1 = 0;                /* 推出清零INT1终中断标志 */
+	setb	_P3_3
+;	infrared.c:10: TMOD &= 0x0F;               /* 清零T1的控制位 */
+	anl	_TMOD,#0x0f
+;	infrared.c:11: TMOD |= 0x10;               /* 配置T1为模式1 */
+	mov	r6,_TMOD
+	orl	ar6,#0x10
+	mov	_TMOD,r6
+;	infrared.c:12: TR1 = 0;                    /* 停止T1计数 */
 ;	assignBit
-	clr	_IE1
-;	main.c:41: return;
-	ljmp	00124$
-00102$:
-;	main.c:44: time = get_high_time();
-	lcall	_get_high_time
-	mov	r6,dpl
-	mov	r7,dph
-;	main.c:45: if ((time < 3686) || (time > 4608))  /* 时间判定范围为4.0～5.0ms, */
-	clr	c
-	mov	a,r6
-	subb	a,#0x66
-	mov	a,r7
-	subb	a,#0x0e
-	jc	00104$
-	clr	a
-	subb	a,r6
-	mov	a,#0x12
-	subb	a,r7
-	jnc	00134$
-00104$:
-;	main.c:47: IE1 = 0;
+	clr	_TR1
+;	infrared.c:13: ET1 = 0;                    /* 禁止T1中断 */
 ;	assignBit
-	clr	_IE1
-;	main.c:48: return;
-	ljmp	00124$
-;	main.c:51: for (i = 0; i < 4; i++)     /* 循环接受4个字节 */
-00134$:
-	mov	r7,#0x00
-;	main.c:53: for (j = 0; j < 8; j++) /* 循环接受判定每个字节的8个bit */
-00132$:
+	clr	_ET1
+;	infrared.c:14: IT1 = 1;                    /* 设置INT1为负边沿触发 */
+;	assignBit
+	setb	_IT1
+;	infrared.c:15: EX1 = 1;                    /* 使能INT1中断 */
+;	assignBit
+	setb	_EX1
+;	infrared.c:16: }
+	ret
+;------------------------------------------------------------
+;Allocation info for local variables in function 'get_high_time'
+;------------------------------------------------------------
+;	infrared.c:19: unsigned int get_high_time(void)
+;	-----------------------------------------
+;	 function get_high_time
+;	-----------------------------------------
+_get_high_time:
+;	infrared.c:21: TH1 = 0;                    /* 清零T1计数初始值 */
+	mov	_TH1,#0x00
+;	infrared.c:22: TL1 = 0;
+	mov	_TL1,#0x00
+;	infrared.c:23: TR1 = 1;                    /* 启动T1计数 */
+;	assignBit
+	setb	_TR1
+;	infrared.c:24: while (IR_INPUT)            /* 红外输入引脚为1时循环检测等待，变为0时则结束本循环 */
+00103$:
+	jnb	_P3_3,00105$
+;	infrared.c:26: if (TH1 >= 0x40)
+	mov	a,#0x100 - 0x40
+	add	a,_TH1
+	jnc	00103$
+;	infrared.c:28: break;              /* 强制退出循环，是为了避免信号异常时，程序假死在这里 */
+00105$:
+;	infrared.c:31: TR1 = 0;
+;	assignBit
+	clr	_TR1
+;	infrared.c:33: return (TH1 * 256 + TL1);     /* T1计数值合成16bit整型数，并返回该数 */
+	mov	r7,_TH1
 	mov	r6,#0x00
-00120$:
-;	main.c:56: time = get_low_time();
-	push	ar7
-	push	ar6
-	lcall	_get_low_time
-	mov	r4,dpl
-	mov	r5,dph
-	pop	ar6
-	pop	ar7
-;	main.c:57: if ((time < 313) || (time > 718)) /* 时间判定范围为340～780us */
-	clr	c
+	mov	r4,_TL1
+	mov	r5,#0x00
 	mov	a,r4
-	subb	a,#0x39
+	add	a,r6
+	mov	dpl,a
 	mov	a,r5
-	subb	a,#0x01
-	jc	00107$
-	mov	a,#0xce
-	subb	a,r4
-	mov	a,#0x02
-	subb	a,r5
-	jnc	00108$
-00107$:
-;	main.c:59: IE1 = 0;
+	addc	a,r7
+	mov	dph,a
+;	infrared.c:34: }
+	ret
+;------------------------------------------------------------
+;Allocation info for local variables in function 'get_low_time'
+;------------------------------------------------------------
+;	infrared.c:37: unsigned int get_low_time(void)
+;	-----------------------------------------
+;	 function get_low_time
+;	-----------------------------------------
+_get_low_time:
+;	infrared.c:39: TH1 = 0;                    /* 清零T1计数初值 */
+	mov	_TH1,#0x00
+;	infrared.c:40: TL1 = 0;
+	mov	_TL1,#0x00
+;	infrared.c:41: TR1 = 1;                    /* 启动T1计数 */
 ;	assignBit
-	clr	_IE1
-;	main.c:60: return;
-	sjmp	00124$
-00108$:
-;	main.c:64: time = get_high_time();
-	push	ar7
-	push	ar6
-	lcall	_get_high_time
-	mov	r4,dpl
-	mov	r5,dph
-	pop	ar6
-	pop	ar7
-;	main.c:65: if ((time > 313) || (time < 718))  /* 时间判定范围为1460us~1900us */
-	clr	c
-	mov	a,#0x39
-	subb	a,r4
-	mov	a,#0x01
-	subb	a,r5
-	jc	00114$
+	setb	_TR1
+;	infrared.c:42: while (!IR_INPUT)       /* 红外输入引脚为0时循环检测等待，变为1则结束本循环 */
+00103$:
+	jb	_P3_3,00105$
+;	infrared.c:44: if (TH1 >= 0x40)
+	mov	a,#0x100 - 0x40
+	add	a,_TH1
+	jnc	00103$
+;	infrared.c:46: break;              /* 强制退出循环，是为了避免信号异常时，程序假死在这里 */
+00105$:
+;	infrared.c:49: TR1 = 0;
+;	assignBit
+	clr	_TR1
+;	infrared.c:51: return (TH1 * 256 + TL1);     /* T1计数值合成16bit整型数，并返回该数 */
+	mov	r7,_TH1
+	mov	r6,#0x00
+	mov	r4,_TL1
+	mov	r5,#0x00
 	mov	a,r4
-	subb	a,#0xce
+	add	a,r6
+	mov	dpl,a
 	mov	a,r5
-	subb	a,#0x02
-	jnc	00115$
-00114$:
-;	main.c:67: byt >>= 1;                       /* 因低位在前，所以数据右移，高位为0 */
-	mov	a,_EXINT_ISR_sloc0_1_0
-	clr	c
-	rrc	a
-	mov	_EXINT_ISR_sloc0_1_0,a
-	sjmp	00121$
-00115$:
-;	main.c:69: else if ((time > 1345) && (time < 1751))
-	clr	c
-	mov	a,#0x41
-	subb	a,r4
-	mov	a,#0x05
-	subb	a,r5
-	jnc	00111$
-	clr	c
-	mov	a,r4
-	subb	a,#0xd7
-	mov	a,r5
-	subb	a,#0x06
-	jnc	00111$
-;	main.c:71: byt >>= 1;                       /* 因低位在前，所以数据右移，高位为0 */
-	mov	a,_EXINT_ISR_sloc0_1_0
-	clr	c
-	rrc	a
-	mov	r5,a
-;	main.c:72: byt |= 0x80;                     /* 高位置1 */
-	mov	r4,#0x00
-	orl	ar5,#0x80
-	mov	_EXINT_ISR_sloc0_1_0,r5
-	sjmp	00121$
-00111$:
-;	main.c:76: IE1 = 0;
-;	assignBit
-	clr	_IE1
-;	main.c:77: return;
-	sjmp	00124$
-00121$:
-;	main.c:53: for (j = 0; j < 8; j++) /* 循环接受判定每个字节的8个bit */
-	inc	r6
-	cjne	r6,#0x08,00186$
-00186$:
-	jc	00120$
-;	main.c:80: ir_code[i] = byt;       /* 接受完一个字节后保存到缓存区 */
-	mov	a,r7
-	add	a,#_ir_code
-	mov	r0,a
-	mov	@r0,_EXINT_ISR_sloc0_1_0
-;	main.c:51: for (i = 0; i < 4; i++)     /* 循环接受4个字节 */
-	inc	r7
-	cjne	r7,#0x04,00188$
-00188$:
-	jnc	00189$
-	ljmp	00132$
-00189$:
-;	main.c:82: ir_flag = 1;                /* 接收完毕后设置标志 */
-	mov	_ir_flag,#0x01
-;	main.c:83: IE1 = 0;                    /* 退出前清零INT1中断标志 */
-;	assignBit
-	clr	_IE1
-00124$:
-;	main.c:84: }
-	pop	psw
-	pop	(0+0)
-	pop	(0+1)
-	pop	(0+2)
-	pop	(0+3)
-	pop	(0+4)
-	pop	(0+5)
-	pop	(0+6)
-	pop	(0+7)
-	pop	dph
-	pop	dpl
-	pop	b
-	pop	acc
-	pop	bits
-	reti
+	addc	a,r7
+	mov	dph,a
+;	infrared.c:52: }
+	ret
 	.area CSEG    (CODE)
 	.area CONST   (CODE)
 	.area XINIT   (CODE)

@@ -1,4 +1,5 @@
 #include "seg.h"
+#include "infrared.h"
 
 unsigned char __code led_char[16] = { /* 数码管显示字符转换表 */
     0xC0, 0xF9, 0xA4, 0xB0, 0x99, 0x92, 0x82, 0xF8,
@@ -51,5 +52,17 @@ void seg_index(void)
     case 4: ADDR2 = 1; ADDR1 = 0; ADDR0 = 0; i++; SEG = led_buff[4]; break;
     case 5: ADDR2 = 1; ADDR1 = 0; ADDR0 = 1; i = 0; SEG = led_buff[5]; break;
     default:break;
+    }
+}
+
+void seg_infrared_driver(void)
+{
+    if (ir_flag)
+    {
+        ir_flag = 0;
+        led_buff[5] = led_char[ir_code[0] >> 4]; /* 用户码显示 */
+        led_buff[4] = led_char[ir_code[0] & 0x0F];
+        led_buff[1] = led_char[ir_code[2] >> 4]; /* 键吗显示 */
+        led_buff[0] = led_char[ir_code[2] & 0x0F];
     }
 }

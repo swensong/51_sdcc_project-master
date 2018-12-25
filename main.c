@@ -1,128 +1,85 @@
 #include "led.h"
 #include "seg.h"
 #include "time.h"
-#include "lcd1602.h"
-#include "key.h"
-#include "motor.h"
-#include "uart.h"
-#include "i2c.h"
-#include "ds1302.h"
-
-#define FLAG_TIME 200           /* 每200ms一个事件循环 */
-
-char flag1s = 0;
-extern unsigned char T0RH;
-extern unsigned char T0RL;
-
-void delay_ms(int xms);
+#include "infrared.h"
 
 void main(void)
 {
-    unsigned char i;
-    unsigned char psec = 0xAA;  /* 秒备份，初值AA确保首次读取时间后会刷新显示 */
-    unsigned char time[8];      /* 当前时间数组 */
-    unsigned char str[12];      /* 字符串转换缓冲区 */
-
-    /* led_init(HIGH); */
-    init_lcd1602();
     seg_init();
-    init_ds1302();
     time0_init(1);
-    config_uart(9600);
+    init_infrared();
     EA = 1;
+
+    seg_show_num(25536);
 
     while (1)
     {
-        key_driver();
-        if (flag1s == 1)
-        {
-            flag1s = 0;
-
-            for (i = 0; i < 7; i++) /* 读取DS1302当前时间 */
-            {
-                time[i] = ds1302_single_read(i);
-            }
-
-            if (psec != time[0]) /* 检测到时间有变化时刷新显示 */
-            {
-                str[0] = '2';
-                str[1] = '0';
-                str[2] = (time[6] >> 4) + '0'; /* 年 */
-                str[3] = (time[6] & 0x0F) + '0'; /* 年 */
-                str[4] = '-';
-                str[5] = (time[4] >> 4) + '0'; /* 月 */
-                str[6] = (time[4] & 0x0F) + '0';
-                str[7] = '-';
-                str[8] = (time[3] >> 3) + '0'; /* 日 */
-                str[9] = (time[3] & 0x0F) + '0';
-                str[10] = '\0';
-                lcd_show_str(0, 0, str);
-
-                str[0] = (time[5] & 0x0F) + '0'; /* 星期 */
-                str[1] = '\0';
-                lcd_show_str(11, 0, "week");
-                lcd_show_str(15, 0, str);
-
-                str[0] = (time[2] >> 4) + '0'; /* 时 */
-                str[1] = (time[2] & 0x0F) + '0';
-                str[2] = ':';
-                str[3] = (time[1] >> 4) + '0'; /* 分 */
-                str[4] = (time[1] & 0x0F) + '0';
-                str[5] = ':';
-                str[6] = (time[0] >> 4) + '0'; /* 秒 */
-                str[7] = (time[0] & 0x0F) + '0';
-                str[8] = '\0';
-                lcd_show_str(4, 1, str);
-
-                psec = time[0];
-            }
-
-            /* seg_driver(cnt++); */
-            /* if (P3_0 == 1) */
-            /* { */
-            /*     P3_0 = 0; */
-            /* } */
-            /* else */
-            /* { */
-            /*     P3_0 = 1; */
-            /* } */
-        }
+        seg_infrared_driver();
     }
 }
 
 void interrupt_timer() __interrupt 1
 {
-    static int cnt = 0;
-
     TH0 = T0RH;
     TL0 = T0RL;
 
-    key_scan();
     seg_index();
-    motor_scan();
-
-    if (cnt++ >= FLAG_TIME)
-    {
-        cnt = 0;
-        flag1s = 1;
-    }
-
 }
 
-void interrupt_uart() __interrupt 4
+/* INT1中断服务函数，执行红外接收及解码 */
+void EXINT_ISR() __interrupt 2
 {
-    uart_scan();
-}
+    unsigned char i, j;
+    unsigned char byt;
+    unsigned int time;
 
-
-/* 附加函数 */
-
-void delay_ms(int xms)
-{
-    int i, j;
-
-    for (i = 0; i < xms; i++)
+    /* 接收并判定引导码的9ms低电平 */
+    time = get_low_time();
+    if ((time < 7833) || (time > 8755)) /* 时间判定范围为8.5～9.5ms, */
     {
-        for (j = 0; j < 110; j++);
+        IE1 = 0;                /* 推出清零INT1终中断标志 */
+        return;
     }
+    /* 接收并判定引导码的4.5ms高电平 */
+    time = get_high_time();
+    if ((time < 3686) || (time > 4608))  /* 时间判定范围为4.0～5.0ms, */
+    {                                    /* 超过此范围为误码，直接退出 */
+        IE1 = 0;
+        return;
+    }
+    /* 接收并判定后续的4字节数据 */
+    for (i = 0; i < 4; i++)     /* 循环接受4个字节 */
+    {
+        for (j = 0; j < 8; j++) /* 循环接受判定每个字节的8个bit */
+        {
+            /* 接收判定每bit的560us低电平 */
+            time = get_low_time();
+            if ((time < 313) || (time > 718)) /* 时间判定范围为340～780us */
+            {                                    /* 超过此范围为误码，直接退出 */
+                IE1 = 0;
+                return;
+            }
+
+            /* 接收每bit高点平时间，判定该bit的值 */
+            time = get_high_time();
+            if ((time > 313) || (time < 718))  /* 时间判定范围为1460us~1900us */
+            {                                    /* 超过此范围为误码，直接退出 */
+                byt >>= 1;                       /* 因低位在前，所以数据右移，高位为0 */
+            }
+            else if ((time > 1345) && (time < 1751))
+            {
+                byt >>= 1;                       /* 因低位在前，所以数据右移，高位为0 */
+                byt |= 0x80;                     /* 高位置1 */
+            }
+            else
+            {
+                IE1 = 0;
+                return;
+            }
+        }
+        ir_code[i] = byt;       /* 接受完一个字节后保存到缓存区 */
+    }
+    ir_flag = 1;                /* 接收完毕后设置标志 */
+    IE1 = 0;                    /* 退出前清零INT1中断标志 */
 }
+

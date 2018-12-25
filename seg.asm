@@ -134,6 +134,7 @@
 	.globl _seg_init
 	.globl _seg_driver
 	.globl _seg_index
+	.globl _seg_infrared_driver
 ;--------------------------------------------------------
 ; special function registers
 ;--------------------------------------------------------
@@ -276,7 +277,7 @@ _led_buff::
 	.ds 6
 _i::
 	.ds 1
-_seg_index_i_65536_12:
+_seg_index_i_65536_16:
 	.ds 1
 ;--------------------------------------------------------
 ; overlayable items in internal ram 
@@ -330,18 +331,18 @@ _seg_index_i_65536_12:
 ;------------------------------------------------------------
 ;Allocation info for local variables in function 'seg_index'
 ;------------------------------------------------------------
-;i                         Allocated with name '_seg_index_i_65536_12'
+;i                         Allocated with name '_seg_index_i_65536_16'
 ;------------------------------------------------------------
-;	seg.c:41: static char i = 0;
-	mov	_seg_index_i_65536_12,#0x00
-;	seg.c:8: unsigned char led_buff[6] = {    /* 数码管显示缓冲区，初始值0xFF确定启动不亮 */
+;	seg.c:42: static char i = 0;
+	mov	_seg_index_i_65536_16,#0x00
+;	seg.c:9: unsigned char led_buff[6] = {    /* 数码管显示缓冲区，初始值0xFF确定启动不亮 */
 	mov	_led_buff,#0xff
 	mov	(_led_buff + 0x0001),#0xff
 	mov	(_led_buff + 0x0002),#0xff
 	mov	(_led_buff + 0x0003),#0xff
 	mov	(_led_buff + 0x0004),#0xf9
 	mov	(_led_buff + 0x0005),#0xc0
-;	seg.c:12: char i = 0;
+;	seg.c:13: char i = 0;
 	mov	_i,#0x00
 ;--------------------------------------------------------
 ; Home
@@ -357,7 +358,7 @@ _seg_index_i_65536_12:
 ;------------------------------------------------------------
 ;num                       Allocated to registers r6 r7 
 ;------------------------------------------------------------
-;	seg.c:14: void seg_show_num(unsigned int num)
+;	seg.c:15: void seg_show_num(unsigned int num)
 ;	-----------------------------------------
 ;	 function seg_show_num
 ;	-----------------------------------------
@@ -370,7 +371,7 @@ _seg_show_num:
 	ar2 = 0x02
 	ar1 = 0x01
 	ar0 = 0x00
-;	seg.c:16: led_buff[4] = led_char[num / 10000];
+;	seg.c:17: led_buff[4] = led_char[num / 10000];
 	mov	r6,dpl
 	mov	r7,dph
 	mov	__divuint_PARM_2,#0x10
@@ -392,7 +393,7 @@ _seg_show_num:
 	movc	a,@a+dptr
 	mov	r5,a
 	mov	(_led_buff + 0x0004),r5
-;	seg.c:17: led_buff[3] = led_char[num / 1000 % 10];
+;	seg.c:18: led_buff[3] = led_char[num / 1000 % 10];
 	mov	__divuint_PARM_2,#0xe8
 	mov	(__divuint_PARM_2 + 1),#0x03
 	mov	dpl,r6
@@ -417,7 +418,7 @@ _seg_show_num:
 	movc	a,@a+dptr
 	mov	r5,a
 	mov	(_led_buff + 0x0003),r5
-;	seg.c:18: led_buff[2] = led_char[num / 100 % 10];
+;	seg.c:19: led_buff[2] = led_char[num / 100 % 10];
 	mov	__divuint_PARM_2,#0x64
 	mov	(__divuint_PARM_2 + 1),#0x00
 	mov	dpl,r6
@@ -442,7 +443,7 @@ _seg_show_num:
 	movc	a,@a+dptr
 	mov	r5,a
 	mov	(_led_buff + 0x0002),r5
-;	seg.c:19: led_buff[1] = led_char[num / 10 % 10];
+;	seg.c:20: led_buff[1] = led_char[num / 10 % 10];
 	mov	__divuint_PARM_2,#0x0a
 	mov	(__divuint_PARM_2 + 1),#0x00
 	mov	dpl,r6
@@ -467,7 +468,7 @@ _seg_show_num:
 	movc	a,@a+dptr
 	mov	r5,a
 	mov	(_led_buff + 0x0001),r5
-;	seg.c:20: led_buff[0] = led_char[num % 10];
+;	seg.c:21: led_buff[0] = led_char[num % 10];
 	mov	__moduint_PARM_2,#0x0a
 	mov	(__moduint_PARM_2 + 1),#0x00
 	mov	dpl,r6
@@ -485,36 +486,36 @@ _seg_show_num:
 	movc	a,@a+dptr
 	mov	r7,a
 	mov	_led_buff,r7
-;	seg.c:21: }
+;	seg.c:22: }
 	ret
 ;------------------------------------------------------------
 ;Allocation info for local variables in function 'seg_init'
 ;------------------------------------------------------------
-;	seg.c:23: void seg_init(void)
+;	seg.c:24: void seg_init(void)
 ;	-----------------------------------------
 ;	 function seg_init
 ;	-----------------------------------------
 _seg_init:
-;	seg.c:25: ADDR3 = 1;                  /* 因为需要动态改变ADDR0-2的值 */
+;	seg.c:26: ADDR3 = 1;                  /* 因为需要动态改变ADDR0-2的值 */
 ;	assignBit
 	setb	_P1_3
-;	seg.c:26: LEDEN = 0;                  /* 是能U3，选择数码管 */
+;	seg.c:27: LEDEN = 0;                  /* 是能U3，选择数码管 */
 ;	assignBit
 	clr	_P1_4
-;	seg.c:27: }
+;	seg.c:28: }
 	ret
 ;------------------------------------------------------------
 ;Allocation info for local variables in function 'seg_driver'
 ;------------------------------------------------------------
 ;sec                       Allocated to registers r7 
 ;------------------------------------------------------------
-;	seg.c:29: void seg_driver(char sec)
+;	seg.c:30: void seg_driver(char sec)
 ;	-----------------------------------------
 ;	 function seg_driver
 ;	-----------------------------------------
 _seg_driver:
 	mov	r7,dpl
-;	seg.c:31: led_buff[0] = led_char[sec%10];
+;	seg.c:32: led_buff[0] = led_char[sec%10];
 	mov	ar5,r7
 	mov	r6,#0x00
 	mov	__modsint_PARM_2,#0x0a
@@ -540,7 +541,7 @@ _seg_driver:
 	movc	a,@a+dptr
 	mov	r4,a
 	mov	_led_buff,r4
-;	seg.c:32: led_buff[1] = led_char[sec/10%10];
+;	seg.c:33: led_buff[1] = led_char[sec/10%10];
 	mov	__divsint_PARM_2,#0x0a
 	mov	(__divsint_PARM_2 + 1),#0x00
 	mov	dpl,r5
@@ -565,7 +566,7 @@ _seg_driver:
 	movc	a,@a+dptr
 	mov	r4,a
 	mov	(_led_buff + 0x0001),r4
-;	seg.c:33: led_buff[2] = led_char[sec/100%10];
+;	seg.c:34: led_buff[2] = led_char[sec/100%10];
 	mov	__divsint_PARM_2,#0x64
 	mov	(__divsint_PARM_2 + 1),#0x00
 	mov	dpl,r5
@@ -590,7 +591,7 @@ _seg_driver:
 	movc	a,@a+dptr
 	mov	r4,a
 	mov	(_led_buff + 0x0002),r4
-;	seg.c:34: led_buff[3] = led_char[sec/1000%10];
+;	seg.c:35: led_buff[3] = led_char[sec/1000%10];
 	mov	__divsint_PARM_2,#0xe8
 	mov	(__divsint_PARM_2 + 1),#0x03
 	mov	dpl,r5
@@ -615,7 +616,7 @@ _seg_driver:
 	movc	a,@a+dptr
 	mov	r4,a
 	mov	(_led_buff + 0x0003),r4
-;	seg.c:35: led_buff[4] = led_char[sec/10000%10];
+;	seg.c:36: led_buff[4] = led_char[sec/10000%10];
 	mov	__divsint_PARM_2,#0x10
 	mov	(__divsint_PARM_2 + 1),#0x27
 	mov	dpl,r5
@@ -637,7 +638,7 @@ _seg_driver:
 	movc	a,@a+dptr
 	mov	r6,a
 	mov	(_led_buff + 0x0004),r6
-;	seg.c:36: led_buff[5] = led_char[sec/100000%10];
+;	seg.c:37: led_buff[5] = led_char[sec/100000%10];
 	mov	r6,#0x00
 	mov	r5,#0x00
 	mov	r4,#0x00
@@ -677,25 +678,25 @@ _seg_driver:
 	movc	a,@a+dptr
 	mov	r7,a
 	mov	(_led_buff + 0x0005),r7
-;	seg.c:37: }
+;	seg.c:38: }
 	ret
 ;------------------------------------------------------------
 ;Allocation info for local variables in function 'seg_index'
 ;------------------------------------------------------------
-;i                         Allocated with name '_seg_index_i_65536_12'
+;i                         Allocated with name '_seg_index_i_65536_16'
 ;------------------------------------------------------------
-;	seg.c:39: void seg_index(void)
+;	seg.c:40: void seg_index(void)
 ;	-----------------------------------------
 ;	 function seg_index
 ;	-----------------------------------------
 _seg_index:
-;	seg.c:43: SEG = 0xFF;                  /* 显示消隐 */
+;	seg.c:44: SEG = 0xFF;                  /* 显示消隐 */
 	mov	_P0,#0xff
-;	seg.c:45: switch (i)
-	mov	a,_seg_index_i_65536_12
+;	seg.c:46: switch (i)
+	mov	a,_seg_index_i_65536_16
 	add	a,#0xff - 0x05
 	jc	00109$
-	mov	a,_seg_index_i_65536_12
+	mov	a,_seg_index_i_65536_16
 	mov	b,#0x03
 	mul	ab
 	mov	dptr,#00116$
@@ -707,7 +708,7 @@ _seg_index:
 	ljmp	00104$
 	ljmp	00105$
 	ljmp	00106$
-;	seg.c:47: case 0: ADDR2 = 0; ADDR1 = 0; ADDR0 = 0; i++; SEG = led_buff[0]; break;
+;	seg.c:48: case 0: ADDR2 = 0; ADDR1 = 0; ADDR0 = 0; i++; SEG = led_buff[0]; break;
 00101$:
 ;	assignBit
 	clr	_P1_2
@@ -715,9 +716,9 @@ _seg_index:
 	clr	_P1_1
 ;	assignBit
 	clr	_P1_0
-	inc	_seg_index_i_65536_12
+	inc	_seg_index_i_65536_16
 	mov	_P0,_led_buff
-;	seg.c:48: case 1: ADDR2 = 0; ADDR1 = 0; ADDR0 = 1; i++; SEG = led_buff[1]; break;
+;	seg.c:49: case 1: ADDR2 = 0; ADDR1 = 0; ADDR0 = 1; i++; SEG = led_buff[1]; break;
 	ret
 00102$:
 ;	assignBit
@@ -726,9 +727,9 @@ _seg_index:
 	clr	_P1_1
 ;	assignBit
 	setb	_P1_0
-	inc	_seg_index_i_65536_12
+	inc	_seg_index_i_65536_16
 	mov	_P0,(_led_buff + 0x0001)
-;	seg.c:49: case 2: ADDR2 = 0; ADDR1 = 1; ADDR0 = 0; i++; SEG = led_buff[2]; break;
+;	seg.c:50: case 2: ADDR2 = 0; ADDR1 = 1; ADDR0 = 0; i++; SEG = led_buff[2]; break;
 	ret
 00103$:
 ;	assignBit
@@ -737,9 +738,9 @@ _seg_index:
 	setb	_P1_1
 ;	assignBit
 	clr	_P1_0
-	inc	_seg_index_i_65536_12
+	inc	_seg_index_i_65536_16
 	mov	_P0,(_led_buff + 0x0002)
-;	seg.c:50: case 3: ADDR2 = 0; ADDR1 = 1; ADDR0 = 1; i++; SEG = led_buff[3]; break;
+;	seg.c:51: case 3: ADDR2 = 0; ADDR1 = 1; ADDR0 = 1; i++; SEG = led_buff[3]; break;
 	ret
 00104$:
 ;	assignBit
@@ -748,9 +749,9 @@ _seg_index:
 	setb	_P1_1
 ;	assignBit
 	setb	_P1_0
-	inc	_seg_index_i_65536_12
+	inc	_seg_index_i_65536_16
 	mov	_P0,(_led_buff + 0x0003)
-;	seg.c:51: case 4: ADDR2 = 1; ADDR1 = 0; ADDR0 = 0; i++; SEG = led_buff[4]; break;
+;	seg.c:52: case 4: ADDR2 = 1; ADDR1 = 0; ADDR0 = 0; i++; SEG = led_buff[4]; break;
 	ret
 00105$:
 ;	assignBit
@@ -759,9 +760,9 @@ _seg_index:
 	clr	_P1_1
 ;	assignBit
 	clr	_P1_0
-	inc	_seg_index_i_65536_12
+	inc	_seg_index_i_65536_16
 	mov	_P0,(_led_buff + 0x0004)
-;	seg.c:52: case 5: ADDR2 = 1; ADDR1 = 0; ADDR0 = 1; i = 0; SEG = led_buff[5]; break;
+;	seg.c:53: case 5: ADDR2 = 1; ADDR1 = 0; ADDR0 = 1; i = 0; SEG = led_buff[5]; break;
 	ret
 00106$:
 ;	assignBit
@@ -770,11 +771,71 @@ _seg_index:
 	clr	_P1_1
 ;	assignBit
 	setb	_P1_0
-	mov	_seg_index_i_65536_12,#0x00
+	mov	_seg_index_i_65536_16,#0x00
 	mov	_P0,(_led_buff + 0x0005)
-;	seg.c:54: }
-00109$:
 ;	seg.c:55: }
+00109$:
+;	seg.c:56: }
+	ret
+;------------------------------------------------------------
+;Allocation info for local variables in function 'seg_infrared_driver'
+;------------------------------------------------------------
+;	seg.c:58: void seg_infrared_driver(void)
+;	-----------------------------------------
+;	 function seg_infrared_driver
+;	-----------------------------------------
+_seg_infrared_driver:
+;	seg.c:60: if (ir_flag)
+	mov	a,_ir_flag
+	jz	00103$
+;	seg.c:62: ir_flag = 0;
+	mov	_ir_flag,#0x00
+;	seg.c:63: led_buff[5] = led_char[ir_code[0] >> 4]; /* 用户码显示 */
+	mov	a,_ir_code
+	swap	a
+	anl	a,#0x0f
+	mov	dptr,#_led_char
+	movc	a,@a+dptr
+	mov	r7,a
+	mov	(_led_buff + 0x0005),r7
+;	seg.c:64: led_buff[4] = led_char[ir_code[0] & 0x0F];
+	mov	r6,_ir_code
+	anl	ar6,#0x0f
+	mov	r7,#0x00
+	mov	a,r6
+	add	a,#_led_char
+	mov	dpl,a
+	mov	a,r7
+	addc	a,#(_led_char >> 8)
+	mov	dph,a
+	clr	a
+	movc	a,@a+dptr
+	mov	r7,a
+	mov	(_led_buff + 0x0004),r7
+;	seg.c:65: led_buff[1] = led_char[ir_code[2] >> 4]; /* 键吗显示 */
+	mov	a,(_ir_code + 0x0002)
+	swap	a
+	anl	a,#0x0f
+	mov	dptr,#_led_char
+	movc	a,@a+dptr
+	mov	r7,a
+	mov	(_led_buff + 0x0001),r7
+;	seg.c:66: led_buff[0] = led_char[ir_code[2] & 0x0F];
+	mov	r6,(_ir_code + 0x0002)
+	anl	ar6,#0x0f
+	mov	r7,#0x00
+	mov	a,r6
+	add	a,#_led_char
+	mov	dpl,a
+	mov	a,r7
+	addc	a,#(_led_char >> 8)
+	mov	dph,a
+	clr	a
+	movc	a,@a+dptr
+	mov	r7,a
+	mov	_led_buff,r7
+00103$:
+;	seg.c:68: }
 	ret
 	.area CSEG    (CODE)
 	.area CONST   (CODE)

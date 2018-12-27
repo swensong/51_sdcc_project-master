@@ -37,11 +37,8 @@ main.bin : main.hex
 main.hex : main.ihx
 	$(PACKIHX) main.ihx > main.hex
 
-main.ihx : main.c led.rel time.rel seg.rel infrared.rel
-	$(CC) $(INC_FLAGS) $(CFLAGS) main.c led.rel time.rel seg.rel infrared.rel
-
-led.rel : led.c
-	$(CC) -c $(INC_FLAGS) $(CFLAGS) led.c
+main.ihx : main.c time.rel seg.rel infrared.rel
+	$(CC) $(INC_FLAGS) $(CFLAGS) main.c time.rel seg.rel infrared.rel
 
 time.rel : time.c
 	$(CC) -c $(INC_FLAGS) $(CFLAGS) time.c

@@ -132,6 +132,7 @@
 	.globl _init_infrared
 	.globl _get_high_time
 	.globl _get_low_time
+	.globl _infrared_scan
 ;--------------------------------------------------------
 ; special function registers
 ;--------------------------------------------------------
@@ -274,6 +275,8 @@ _ir_flag::
 	.ds 1
 _ir_code::
 	.ds 4
+_infrared_scan_sloc0_1_0:
+	.ds 1
 ;--------------------------------------------------------
 ; overlayable items in internal ram 
 ;--------------------------------------------------------
@@ -323,7 +326,7 @@ _ir_code::
 	.area GSINIT  (CODE)
 	.area GSFINAL (CODE)
 	.area GSINIT  (CODE)
-;	infrared.c:3: unsigned char ir_flag = 0;      /* 红外接受标志，收到一段正确数据后置1 */
+;	infrared.c:4: unsigned char ir_flag = 0;      /* 红外接受标志，收到一段正确数据后置1 */
 	mov	_ir_flag,#0x00
 ;--------------------------------------------------------
 ; Home
@@ -337,7 +340,7 @@ _ir_code::
 ;------------------------------------------------------------
 ;Allocation info for local variables in function 'init_infrared'
 ;------------------------------------------------------------
-;	infrared.c:7: void init_infrared(void)
+;	infrared.c:8: void init_infrared(void)
 ;	-----------------------------------------
 ;	 function init_infrared
 ;	-----------------------------------------
@@ -350,57 +353,57 @@ _init_infrared:
 	ar2 = 0x02
 	ar1 = 0x01
 	ar0 = 0x00
-;	infrared.c:9: IR_INPUT = 1;               /* 确保红外接收引脚被释放 */
+;	infrared.c:10: IR_INPUT = 1;               /* 确保红外接收引脚被释放 */
 ;	assignBit
 	setb	_P3_3
-;	infrared.c:10: TMOD &= 0x0F;               /* 清零T1的控制位 */
+;	infrared.c:11: TMOD &= 0x0F;               /* 清零T1的控制位 */
 	anl	_TMOD,#0x0f
-;	infrared.c:11: TMOD |= 0x10;               /* 配置T1为模式1 */
+;	infrared.c:12: TMOD |= 0x10;               /* 配置T1为模式1 */
 	mov	r6,_TMOD
 	orl	ar6,#0x10
 	mov	_TMOD,r6
-;	infrared.c:12: TR1 = 0;                    /* 停止T1计数 */
+;	infrared.c:13: TR1 = 0;                    /* 停止T1计数 */
 ;	assignBit
 	clr	_TR1
-;	infrared.c:13: ET1 = 0;                    /* 禁止T1中断 */
+;	infrared.c:14: ET1 = 0;                    /* 禁止T1中断 */
 ;	assignBit
 	clr	_ET1
-;	infrared.c:14: IT1 = 1;                    /* 设置INT1为负边沿触发 */
+;	infrared.c:15: IT1 = 1;                    /* 设置INT1为负边沿触发 */
 ;	assignBit
 	setb	_IT1
-;	infrared.c:15: EX1 = 1;                    /* 使能INT1中断 */
+;	infrared.c:16: EX1 = 1;                    /* 使能INT1中断 */
 ;	assignBit
 	setb	_EX1
-;	infrared.c:16: }
+;	infrared.c:17: }
 	ret
 ;------------------------------------------------------------
 ;Allocation info for local variables in function 'get_high_time'
 ;------------------------------------------------------------
-;	infrared.c:19: unsigned int get_high_time(void)
+;	infrared.c:20: unsigned int get_high_time(void)
 ;	-----------------------------------------
 ;	 function get_high_time
 ;	-----------------------------------------
 _get_high_time:
-;	infrared.c:21: TH1 = 0;                    /* 清零T1计数初始值 */
+;	infrared.c:22: TH1 = 0;                    /* 清零T1计数初始值 */
 	mov	_TH1,#0x00
-;	infrared.c:22: TL1 = 0;
+;	infrared.c:23: TL1 = 0;
 	mov	_TL1,#0x00
-;	infrared.c:23: TR1 = 1;                    /* 启动T1计数 */
+;	infrared.c:24: TR1 = 1;                    /* 启动T1计数 */
 ;	assignBit
 	setb	_TR1
-;	infrared.c:24: while (IR_INPUT)            /* 红外输入引脚为1时循环检测等待，变为0时则结束本循环 */
+;	infrared.c:25: while (IR_INPUT)            /* 红外输入引脚为1时循环检测等待，变为0时则结束本循环 */
 00103$:
 	jnb	_P3_3,00105$
-;	infrared.c:26: if (TH1 >= 0x40)
+;	infrared.c:27: if (TH1 >= 0x40)
 	mov	a,#0x100 - 0x40
 	add	a,_TH1
 	jnc	00103$
-;	infrared.c:28: break;              /* 强制退出循环，是为了避免信号异常时，程序假死在这里 */
+;	infrared.c:29: break;              /* 强制退出循环，是为了避免信号异常时，程序假死在这里 */
 00105$:
-;	infrared.c:31: TR1 = 0;
+;	infrared.c:32: TR1 = 0;
 ;	assignBit
 	clr	_TR1
-;	infrared.c:33: return (TH1 * 256 + TL1);     /* T1计数值合成16bit整型数，并返回该数 */
+;	infrared.c:34: return (TH1 * 256 + TL1);     /* T1计数值合成16bit整型数，并返回该数 */
 	mov	r7,_TH1
 	mov	r6,#0x00
 	mov	r4,_TL1
@@ -411,36 +414,36 @@ _get_high_time:
 	mov	a,r5
 	addc	a,r7
 	mov	dph,a
-;	infrared.c:34: }
+;	infrared.c:35: }
 	ret
 ;------------------------------------------------------------
 ;Allocation info for local variables in function 'get_low_time'
 ;------------------------------------------------------------
-;	infrared.c:37: unsigned int get_low_time(void)
+;	infrared.c:38: unsigned int get_low_time(void)
 ;	-----------------------------------------
 ;	 function get_low_time
 ;	-----------------------------------------
 _get_low_time:
-;	infrared.c:39: TH1 = 0;                    /* 清零T1计数初值 */
+;	infrared.c:40: TH1 = 0;                    /* 清零T1计数初值 */
 	mov	_TH1,#0x00
-;	infrared.c:40: TL1 = 0;
+;	infrared.c:41: TL1 = 0;
 	mov	_TL1,#0x00
-;	infrared.c:41: TR1 = 1;                    /* 启动T1计数 */
+;	infrared.c:42: TR1 = 1;                    /* 启动T1计数 */
 ;	assignBit
 	setb	_TR1
-;	infrared.c:42: while (!IR_INPUT)       /* 红外输入引脚为0时循环检测等待，变为1则结束本循环 */
+;	infrared.c:43: while (!IR_INPUT)       /* 红外输入引脚为0时循环检测等待，变为1则结束本循环 */
 00103$:
 	jb	_P3_3,00105$
-;	infrared.c:44: if (TH1 >= 0x40)
+;	infrared.c:45: if (TH1 >= 0x40)
 	mov	a,#0x100 - 0x40
 	add	a,_TH1
 	jnc	00103$
-;	infrared.c:46: break;              /* 强制退出循环，是为了避免信号异常时，程序假死在这里 */
+;	infrared.c:47: break;              /* 强制退出循环，是为了避免信号异常时，程序假死在这里 */
 00105$:
-;	infrared.c:49: TR1 = 0;
+;	infrared.c:50: TR1 = 0;
 ;	assignBit
 	clr	_TR1
-;	infrared.c:51: return (TH1 * 256 + TL1);     /* T1计数值合成16bit整型数，并返回该数 */
+;	infrared.c:52: return (TH1 * 256 + TL1);     /* T1计数值合成16bit整型数，并返回该数 */
 	mov	r7,_TH1
 	mov	r6,#0x00
 	mov	r4,_TL1
@@ -451,7 +454,182 @@ _get_low_time:
 	mov	a,r5
 	addc	a,r7
 	mov	dph,a
-;	infrared.c:52: }
+;	infrared.c:53: }
+	ret
+;------------------------------------------------------------
+;Allocation info for local variables in function 'infrared_scan'
+;------------------------------------------------------------
+;i                         Allocated to registers r7 
+;j                         Allocated to registers r6 
+;byt                       Allocated to registers r5 
+;time                      Allocated to registers r4 r5 
+;sloc0                     Allocated with name '_infrared_scan_sloc0_1_0'
+;------------------------------------------------------------
+;	infrared.c:55: void infrared_scan(void)
+;	-----------------------------------------
+;	 function infrared_scan
+;	-----------------------------------------
+_infrared_scan:
+;	infrared.c:62: time = get_low_time();
+	lcall	_get_low_time
+	mov	r6,dpl
+	mov	r7,dph
+;	infrared.c:64: if ((time < 7833) || (time > 8755))
+	clr	c
+	mov	a,r6
+	subb	a,#0x99
+	mov	a,r7
+	subb	a,#0x1e
+	jc	00101$
+	mov	a,#0x33
+	subb	a,r6
+	mov	a,#0x22
+	subb	a,r7
+	jnc	00102$
+00101$:
+;	infrared.c:66: IE1 = 0;                /* 退出前清零INT1中断标志位 */
+;	assignBit
+	clr	_IE1
+;	infrared.c:67: return;
+	ret
+00102$:
+;	infrared.c:71: time = get_high_time();
+	lcall	_get_high_time
+	mov	r6,dpl
+	mov	r7,dph
+;	infrared.c:72: if ((time < 3686) || (time > 4608))
+	clr	c
+	mov	a,r6
+	subb	a,#0x66
+	mov	a,r7
+	subb	a,#0x0e
+	jc	00104$
+	clr	a
+	subb	a,r6
+	mov	a,#0x12
+	subb	a,r7
+	jnc	00135$
+00104$:
+;	infrared.c:74: IE1 = 0;
+;	assignBit
+	clr	_IE1
+;	infrared.c:75: return;
+	ret
+;	infrared.c:79: for (i = 0; i < 4; i++)     /* 循环接收4个字节 */
+00135$:
+	mov	r7,#0x00
+;	infrared.c:81: for (j = 0; j < 8; j++)
+00133$:
+	mov	r6,#0x00
+00120$:
+;	infrared.c:84: time = get_low_time();
+	push	ar7
+	push	ar6
+	lcall	_get_low_time
+	mov	r4,dpl
+	mov	r5,dph
+	pop	ar6
+	pop	ar7
+;	infrared.c:85: if ((time < 313) || (time > 718))
+	clr	c
+	mov	a,r4
+	subb	a,#0x39
+	mov	a,r5
+	subb	a,#0x01
+	jc	00107$
+	mov	a,#0xce
+	subb	a,r4
+	mov	a,#0x02
+	subb	a,r5
+	jnc	00108$
+00107$:
+;	infrared.c:87: IE1 = 0;
+;	assignBit
+	clr	_IE1
+;	infrared.c:88: return;
+	ret
+00108$:
+;	infrared.c:91: time = get_high_time();
+	push	ar7
+	push	ar6
+	lcall	_get_high_time
+	mov	r4,dpl
+	mov	r5,dph
+	pop	ar6
+	pop	ar7
+;	infrared.c:92: if ((time > 313) && (time < 718))
+	clr	c
+	mov	a,#0x39
+	subb	a,r4
+	mov	a,#0x01
+	subb	a,r5
+	jnc	00115$
+	clr	c
+	mov	a,r4
+	subb	a,#0xce
+	mov	a,r5
+	subb	a,#0x02
+	jnc	00115$
+;	infrared.c:94: byt >>= 1;
+	mov	a,_infrared_scan_sloc0_1_0
+	clr	c
+	rrc	a
+	mov	_infrared_scan_sloc0_1_0,a
+	sjmp	00121$
+00115$:
+;	infrared.c:96: else if ((time > 1345) && (time < 1751))
+	clr	c
+	mov	a,#0x41
+	subb	a,r4
+	mov	a,#0x05
+	subb	a,r5
+	jnc	00111$
+	clr	c
+	mov	a,r4
+	subb	a,#0xd7
+	mov	a,r5
+	subb	a,#0x06
+	jnc	00111$
+;	infrared.c:98: byt >>= 1;
+	mov	a,_infrared_scan_sloc0_1_0
+	clr	c
+	rrc	a
+	mov	r5,a
+;	infrared.c:99: byt |= 0x80;
+	mov	r4,#0x00
+	orl	ar5,#0x80
+	mov	_infrared_scan_sloc0_1_0,r5
+	sjmp	00121$
+00111$:
+;	infrared.c:103: IE1 = 0;
+;	assignBit
+	clr	_IE1
+;	infrared.c:104: return;
+	ret
+00121$:
+;	infrared.c:81: for (j = 0; j < 8; j++)
+	inc	r6
+	cjne	r6,#0x08,00191$
+00191$:
+	jc	00120$
+;	infrared.c:107: ir_code[i] = byt;
+	mov	a,r7
+	add	a,#_ir_code
+	mov	r0,a
+	mov	@r0,_infrared_scan_sloc0_1_0
+;	infrared.c:79: for (i = 0; i < 4; i++)     /* 循环接收4个字节 */
+	inc	r7
+	cjne	r7,#0x04,00193$
+00193$:
+	jnc	00194$
+	ljmp	00133$
+00194$:
+;	infrared.c:109: ir_flag = 1;
+	mov	_ir_flag,#0x01
+;	infrared.c:110: IE1 = 0;
+;	assignBit
+	clr	_IE1
+;	infrared.c:111: }
 	ret
 	.area CSEG    (CODE)
 	.area CONST   (CODE)

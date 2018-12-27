@@ -277,7 +277,7 @@ _led_buff::
 	.ds 6
 _i::
 	.ds 1
-_seg_index_i_65536_16:
+_seg_index_i_65536_17:
 	.ds 1
 ;--------------------------------------------------------
 ; overlayable items in internal ram 
@@ -331,10 +331,10 @@ _seg_index_i_65536_16:
 ;------------------------------------------------------------
 ;Allocation info for local variables in function 'seg_index'
 ;------------------------------------------------------------
-;i                         Allocated with name '_seg_index_i_65536_16'
+;i                         Allocated with name '_seg_index_i_65536_17'
 ;------------------------------------------------------------
 ;	seg.c:42: static char i = 0;
-	mov	_seg_index_i_65536_16,#0x00
+	mov	_seg_index_i_65536_17,#0x00
 ;	seg.c:9: unsigned char led_buff[6] = {    /* 数码管显示缓冲区，初始值0xFF确定启动不亮 */
 	mov	_led_buff,#0xff
 	mov	(_led_buff + 0x0001),#0xff
@@ -683,7 +683,7 @@ _seg_driver:
 ;------------------------------------------------------------
 ;Allocation info for local variables in function 'seg_index'
 ;------------------------------------------------------------
-;i                         Allocated with name '_seg_index_i_65536_16'
+;i                         Allocated with name '_seg_index_i_65536_17'
 ;------------------------------------------------------------
 ;	seg.c:40: void seg_index(void)
 ;	-----------------------------------------
@@ -693,10 +693,10 @@ _seg_index:
 ;	seg.c:44: SEG = 0xFF;                  /* 显示消隐 */
 	mov	_P0,#0xff
 ;	seg.c:46: switch (i)
-	mov	a,_seg_index_i_65536_16
+	mov	a,_seg_index_i_65536_17
 	add	a,#0xff - 0x05
 	jc	00109$
-	mov	a,_seg_index_i_65536_16
+	mov	a,_seg_index_i_65536_17
 	mov	b,#0x03
 	mul	ab
 	mov	dptr,#00116$
@@ -716,7 +716,7 @@ _seg_index:
 	clr	_P1_1
 ;	assignBit
 	clr	_P1_0
-	inc	_seg_index_i_65536_16
+	inc	_seg_index_i_65536_17
 	mov	_P0,_led_buff
 ;	seg.c:49: case 1: ADDR2 = 0; ADDR1 = 0; ADDR0 = 1; i++; SEG = led_buff[1]; break;
 	ret
@@ -727,7 +727,7 @@ _seg_index:
 	clr	_P1_1
 ;	assignBit
 	setb	_P1_0
-	inc	_seg_index_i_65536_16
+	inc	_seg_index_i_65536_17
 	mov	_P0,(_led_buff + 0x0001)
 ;	seg.c:50: case 2: ADDR2 = 0; ADDR1 = 1; ADDR0 = 0; i++; SEG = led_buff[2]; break;
 	ret
@@ -738,7 +738,7 @@ _seg_index:
 	setb	_P1_1
 ;	assignBit
 	clr	_P1_0
-	inc	_seg_index_i_65536_16
+	inc	_seg_index_i_65536_17
 	mov	_P0,(_led_buff + 0x0002)
 ;	seg.c:51: case 3: ADDR2 = 0; ADDR1 = 1; ADDR0 = 1; i++; SEG = led_buff[3]; break;
 	ret
@@ -749,7 +749,7 @@ _seg_index:
 	setb	_P1_1
 ;	assignBit
 	setb	_P1_0
-	inc	_seg_index_i_65536_16
+	inc	_seg_index_i_65536_17
 	mov	_P0,(_led_buff + 0x0003)
 ;	seg.c:52: case 4: ADDR2 = 1; ADDR1 = 0; ADDR0 = 0; i++; SEG = led_buff[4]; break;
 	ret
@@ -760,7 +760,7 @@ _seg_index:
 	clr	_P1_1
 ;	assignBit
 	clr	_P1_0
-	inc	_seg_index_i_65536_16
+	inc	_seg_index_i_65536_17
 	mov	_P0,(_led_buff + 0x0004)
 ;	seg.c:53: case 5: ADDR2 = 1; ADDR1 = 0; ADDR0 = 1; i = 0; SEG = led_buff[5]; break;
 	ret
@@ -771,7 +771,7 @@ _seg_index:
 	clr	_P1_1
 ;	assignBit
 	setb	_P1_0
-	mov	_seg_index_i_65536_16,#0x00
+	mov	_seg_index_i_65536_17,#0x00
 	mov	_P0,(_led_buff + 0x0005)
 ;	seg.c:55: }
 00109$:

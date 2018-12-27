@@ -11,8 +11,7 @@
 	.globl _EXINT_ISR
 	.globl _interrupt_timer
 	.globl _main
-	.globl _get_low_time
-	.globl _get_high_time
+	.globl _infrared_scan
 	.globl _init_infrared
 	.globl _time0_init
 	.globl _seg_infrared_driver
@@ -290,8 +289,6 @@ bits:
 ; internal ram data
 ;--------------------------------------------------------
 	.area DSEG    (DATA)
-_EXINT_ISR_sloc0_1_0:
-	.ds 1
 ;--------------------------------------------------------
 ; overlayable items in internal ram 
 ;--------------------------------------------------------
@@ -382,7 +379,7 @@ __sdcc_program_startup:
 ;------------------------------------------------------------
 ;Allocation info for local variables in function 'main'
 ;------------------------------------------------------------
-;	main.c:6: void main(void)
+;	main.c:5: void main(void)
 ;	-----------------------------------------
 ;	 function main
 ;	-----------------------------------------
@@ -395,29 +392,29 @@ _main:
 	ar2 = 0x02
 	ar1 = 0x01
 	ar0 = 0x00
-;	main.c:8: seg_init();
+;	main.c:7: seg_init();
 	lcall	_seg_init
-;	main.c:9: time0_init(1);
+;	main.c:8: time0_init(1);
 	mov	dptr,#0x0001
 	lcall	_time0_init
-;	main.c:10: init_infrared();
+;	main.c:9: init_infrared();
 	lcall	_init_infrared
-;	main.c:11: EA = 1;
+;	main.c:10: EA = 1;
 ;	assignBit
 	setb	_EA
-;	main.c:13: seg_show_num(25536);
-	mov	dptr,#0x63c0
+;	main.c:12: seg_show_num(0);
+	mov	dptr,#0x0000
 	lcall	_seg_show_num
-;	main.c:15: while (1)
+;	main.c:14: while (1)
 00102$:
-;	main.c:17: seg_infrared_driver();
+;	main.c:16: seg_infrared_driver();
 	lcall	_seg_infrared_driver
-;	main.c:19: }
+;	main.c:18: }
 	sjmp	00102$
 ;------------------------------------------------------------
 ;Allocation info for local variables in function 'interrupt_timer'
 ;------------------------------------------------------------
-;	main.c:21: void interrupt_timer() __interrupt 1
+;	main.c:20: void interrupt_timer() __interrupt 1
 ;	-----------------------------------------
 ;	 function interrupt_timer
 ;	-----------------------------------------
@@ -437,13 +434,13 @@ _interrupt_timer:
 	push	(0+0)
 	push	psw
 	mov	psw,#0x00
-;	main.c:23: TH0 = T0RH;
+;	main.c:22: TH0 = T0RH;
 	mov	_TH0,_T0RH
-;	main.c:24: TL0 = T0RL;
+;	main.c:23: TL0 = T0RL;
 	mov	_TL0,_T0RL
-;	main.c:26: seg_index();
+;	main.c:25: seg_index();
 	lcall	_seg_index
-;	main.c:27: }
+;	main.c:26: }
 	pop	psw
 	pop	(0+0)
 	pop	(0+1)
@@ -462,13 +459,7 @@ _interrupt_timer:
 ;------------------------------------------------------------
 ;Allocation info for local variables in function 'EXINT_ISR'
 ;------------------------------------------------------------
-;i                         Allocated to registers r7 
-;j                         Allocated to registers r6 
-;byt                       Allocated to registers r5 
-;time                      Allocated to registers r4 r5 
-;sloc0                     Allocated with name '_EXINT_ISR_sloc0_1_0'
-;------------------------------------------------------------
-;	main.c:30: void EXINT_ISR() __interrupt 2
+;	main.c:29: void EXINT_ISR() __interrupt 2
 ;	-----------------------------------------
 ;	 function EXINT_ISR
 ;	-----------------------------------------
@@ -488,167 +479,9 @@ _EXINT_ISR:
 	push	(0+0)
 	push	psw
 	mov	psw,#0x00
-;	main.c:37: time = get_low_time();
-	lcall	_get_low_time
-	mov	r6,dpl
-	mov	r7,dph
-;	main.c:38: if ((time < 7833) || (time > 8755)) /* 时间判定范围为8.5～9.5ms, */
-	clr	c
-	mov	a,r6
-	subb	a,#0x99
-	mov	a,r7
-	subb	a,#0x1e
-	jc	00101$
-	mov	a,#0x33
-	subb	a,r6
-	mov	a,#0x22
-	subb	a,r7
-	jnc	00102$
-00101$:
-;	main.c:40: IE1 = 0;                /* 推出清零INT1终中断标志 */
-;	assignBit
-	clr	_IE1
-;	main.c:41: return;
-	ljmp	00124$
-00102$:
-;	main.c:44: time = get_high_time();
-	lcall	_get_high_time
-	mov	r6,dpl
-	mov	r7,dph
-;	main.c:45: if ((time < 3686) || (time > 4608))  /* 时间判定范围为4.0～5.0ms, */
-	clr	c
-	mov	a,r6
-	subb	a,#0x66
-	mov	a,r7
-	subb	a,#0x0e
-	jc	00104$
-	clr	a
-	subb	a,r6
-	mov	a,#0x12
-	subb	a,r7
-	jnc	00134$
-00104$:
-;	main.c:47: IE1 = 0;
-;	assignBit
-	clr	_IE1
-;	main.c:48: return;
-	ljmp	00124$
-;	main.c:51: for (i = 0; i < 4; i++)     /* 循环接受4个字节 */
-00134$:
-	mov	r7,#0x00
-;	main.c:53: for (j = 0; j < 8; j++) /* 循环接受判定每个字节的8个bit */
-00132$:
-	mov	r6,#0x00
-00120$:
-;	main.c:56: time = get_low_time();
-	push	ar7
-	push	ar6
-	lcall	_get_low_time
-	mov	r4,dpl
-	mov	r5,dph
-	pop	ar6
-	pop	ar7
-;	main.c:57: if ((time < 313) || (time > 718)) /* 时间判定范围为340～780us */
-	clr	c
-	mov	a,r4
-	subb	a,#0x39
-	mov	a,r5
-	subb	a,#0x01
-	jc	00107$
-	mov	a,#0xce
-	subb	a,r4
-	mov	a,#0x02
-	subb	a,r5
-	jnc	00108$
-00107$:
-;	main.c:59: IE1 = 0;
-;	assignBit
-	clr	_IE1
-;	main.c:60: return;
-	sjmp	00124$
-00108$:
-;	main.c:64: time = get_high_time();
-	push	ar7
-	push	ar6
-	lcall	_get_high_time
-	mov	r4,dpl
-	mov	r5,dph
-	pop	ar6
-	pop	ar7
-;	main.c:65: if ((time > 313) || (time < 718))  /* 时间判定范围为1460us~1900us */
-	clr	c
-	mov	a,#0x39
-	subb	a,r4
-	mov	a,#0x01
-	subb	a,r5
-	jc	00114$
-	mov	a,r4
-	subb	a,#0xce
-	mov	a,r5
-	subb	a,#0x02
-	jnc	00115$
-00114$:
-;	main.c:67: byt >>= 1;                       /* 因低位在前，所以数据右移，高位为0 */
-	mov	a,_EXINT_ISR_sloc0_1_0
-	clr	c
-	rrc	a
-	mov	_EXINT_ISR_sloc0_1_0,a
-	sjmp	00121$
-00115$:
-;	main.c:69: else if ((time > 1345) && (time < 1751))
-	clr	c
-	mov	a,#0x41
-	subb	a,r4
-	mov	a,#0x05
-	subb	a,r5
-	jnc	00111$
-	clr	c
-	mov	a,r4
-	subb	a,#0xd7
-	mov	a,r5
-	subb	a,#0x06
-	jnc	00111$
-;	main.c:71: byt >>= 1;                       /* 因低位在前，所以数据右移，高位为0 */
-	mov	a,_EXINT_ISR_sloc0_1_0
-	clr	c
-	rrc	a
-	mov	r5,a
-;	main.c:72: byt |= 0x80;                     /* 高位置1 */
-	mov	r4,#0x00
-	orl	ar5,#0x80
-	mov	_EXINT_ISR_sloc0_1_0,r5
-	sjmp	00121$
-00111$:
-;	main.c:76: IE1 = 0;
-;	assignBit
-	clr	_IE1
-;	main.c:77: return;
-	sjmp	00124$
-00121$:
-;	main.c:53: for (j = 0; j < 8; j++) /* 循环接受判定每个字节的8个bit */
-	inc	r6
-	cjne	r6,#0x08,00186$
-00186$:
-	jc	00120$
-;	main.c:80: ir_code[i] = byt;       /* 接受完一个字节后保存到缓存区 */
-	mov	a,r7
-	add	a,#_ir_code
-	mov	r0,a
-	mov	@r0,_EXINT_ISR_sloc0_1_0
-;	main.c:51: for (i = 0; i < 4; i++)     /* 循环接受4个字节 */
-	inc	r7
-	cjne	r7,#0x04,00188$
-00188$:
-	jnc	00189$
-	ljmp	00132$
-00189$:
-;	main.c:82: ir_flag = 1;                /* 接收完毕后设置标志 */
-	mov	_ir_flag,#0x01
-;	main.c:83: IE1 = 0;                    /* 退出前清零INT1中断标志 */
-;	assignBit
-	clr	_IE1
-00124$:
-;	main.c:84: }
+;	main.c:31: infrared_scan();
+	lcall	_infrared_scan
+;	main.c:32: }
 	pop	psw
 	pop	(0+0)
 	pop	(0+1)

@@ -15,7 +15,6 @@
 -l liblong
 -l libfloat
 main.rel
-led.rel
 time.rel
 seg.rel
 infrared.rel

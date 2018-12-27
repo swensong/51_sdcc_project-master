@@ -1,4 +1,5 @@
 #include "infrared.h"
+#include "seg.h"
 
 unsigned char ir_flag = 0;      /* 红外接受标志，收到一段正确数据后置1 */
 unsigned char ir_code[4];       /* 红外代码接收缓冲区 */
@@ -49,4 +50,62 @@ unsigned int get_low_time(void)
     TR1 = 0;
 
     return (TH1 * 256 + TL1);     /* T1计数值合成16bit整型数，并返回该数 */
+}
+
+void infrared_scan(void)
+{
+    unsigned char i, j;
+    unsigned char byt;
+    unsigned int time;
+
+    /* 接收并判定引导码的9ms低电平 */
+    time = get_low_time();
+    /* if ((time < 1000) || (time > 3000)) */
+    if ((time < 7833) || (time > 8755))
+    {
+        IE1 = 0;                /* 退出前清零INT1中断标志位 */
+        return;
+    }
+
+    /* 接收并判定引导码的4.5ms高电平 */
+    time = get_high_time();
+    if ((time < 3686) || (time > 4608))
+    {
+        IE1 = 0;
+        return;
+    }
+
+    /* 接收并判定后续的4字节数据 */
+    for (i = 0; i < 4; i++)     /* 循环接收4个字节 */
+    {
+        for (j = 0; j < 8; j++)
+        {
+            /* 接收到每bit的560us电平 */
+            time = get_low_time();
+            if ((time < 313) || (time > 718))
+            {
+                IE1 = 0;
+                return;
+            }
+            /* 接收到每bit的高电平时间，判定该bit的值 */
+            time = get_high_time();
+            if ((time > 313) && (time < 718))
+            {
+                byt >>= 1;
+            }
+            else if ((time > 1345) && (time < 1751))
+            {
+                byt >>= 1;
+                byt |= 0x80;
+            }
+            else
+            {
+                IE1 = 0;
+                return;
+            }
+        }
+        ir_code[i] = byt;
+    }
+    ir_flag = 1;
+    IE1 = 0;
 }

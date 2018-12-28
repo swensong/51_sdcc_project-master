@@ -8,13 +8,11 @@
 ;--------------------------------------------------------
 ; Public variables in this module
 ;--------------------------------------------------------
-	.globl _EXINT_ISR
 	.globl _interrupt_timer
 	.globl _main
-	.globl _infrared_scan
-	.globl _init_infrared
+	.globl _get_18b20_temp
+	.globl _start_18b20
 	.globl _time0_init
-	.globl _seg_infrared_driver
 	.globl _seg_show_num
 	.globl _seg_index
 	.globl _seg_init
@@ -137,6 +135,7 @@
 	.globl _DPL
 	.globl _SP
 	.globl _P0
+	.globl _flag_1s
 ;--------------------------------------------------------
 ; special function registers
 ;--------------------------------------------------------
@@ -289,6 +288,10 @@ bits:
 ; internal ram data
 ;--------------------------------------------------------
 	.area DSEG    (DATA)
+_main_temp_65536_18:
+	.ds 2
+_interrupt_timer_cnt_65536_23:
+	.ds 2
 ;--------------------------------------------------------
 ; overlayable items in internal ram 
 ;--------------------------------------------------------
@@ -312,6 +315,8 @@ __start__stack:
 ; bit data
 ;--------------------------------------------------------
 	.area BSEG    (BIT)
+_flag_1s::
+	.ds 1
 ;--------------------------------------------------------
 ; paged external ram data
 ;--------------------------------------------------------
@@ -347,8 +352,6 @@ __interrupt_vect:
 	reti
 	.ds	7
 	ljmp	_interrupt_timer
-	.ds	5
-	ljmp	_EXINT_ISR
 ;--------------------------------------------------------
 ; global & static initialisations
 ;--------------------------------------------------------
@@ -362,6 +365,18 @@ __interrupt_vect:
 	.globl __mcs51_genXINIT
 	.globl __mcs51_genXRAMCLEAR
 	.globl __mcs51_genRAMCLEAR
+;------------------------------------------------------------
+;Allocation info for local variables in function 'interrupt_timer'
+;------------------------------------------------------------
+;cnt                       Allocated with name '_interrupt_timer_cnt_65536_23'
+;------------------------------------------------------------
+;	main.c:47: static unsigned int cnt = 0;
+	clr	a
+	mov	_interrupt_timer_cnt_65536_23,a
+	mov	(_interrupt_timer_cnt_65536_23 + 1),a
+;	main.c:6: __bit flag_1s = 0;
+;	assignBit
+	clr	_flag_1s
 	.area GSFINAL (CODE)
 	ljmp	__sdcc_program_startup
 ;--------------------------------------------------------
@@ -379,7 +394,11 @@ __sdcc_program_startup:
 ;------------------------------------------------------------
 ;Allocation info for local variables in function 'main'
 ;------------------------------------------------------------
-;	main.c:5: void main(void)
+;temp                      Allocated with name '_main_temp_65536_18'
+;intT                      Allocated to registers 
+;decT                      Allocated to registers 
+;------------------------------------------------------------
+;	main.c:8: void main(void)
 ;	-----------------------------------------
 ;	 function main
 ;	-----------------------------------------
@@ -392,29 +411,42 @@ _main:
 	ar2 = 0x02
 	ar1 = 0x01
 	ar0 = 0x00
-;	main.c:7: seg_init();
+;	main.c:14: seg_init();
 	lcall	_seg_init
-;	main.c:8: time0_init(1);
+;	main.c:15: time0_init(1);
 	mov	dptr,#0x0001
 	lcall	_time0_init
-;	main.c:9: init_infrared();
-	lcall	_init_infrared
-;	main.c:10: EA = 1;
+;	main.c:16: EA = 1;
 ;	assignBit
 	setb	_EA
-;	main.c:12: seg_show_num(0);
-	mov	dptr,#0x0000
+;	main.c:19: start_18b20();
+	lcall	_start_18b20
+;	main.c:21: while (1)
+00106$:
+;	main.c:23: if (flag_1s == 1)
+;	main.c:25: flag_1s = 0;
+;	assignBit
+	jbc	_flag_1s,00119$
+	sjmp	00106$
+00119$:
+;	main.c:26: res = get_18b20_temp(&temp);
+	mov	dptr,#_main_temp_65536_18
+	mov	b,#0x40
+	lcall	_get_18b20_temp
+;	main.c:27: seg_show_num(temp);
+	mov	dpl,_main_temp_65536_18
+	mov	dph,(_main_temp_65536_18 + 1)
 	lcall	_seg_show_num
-;	main.c:14: while (1)
-00102$:
-;	main.c:16: seg_infrared_driver();
-	lcall	_seg_infrared_driver
-;	main.c:18: }
-	sjmp	00102$
+;	main.c:38: start_18b20();
+	lcall	_start_18b20
+;	main.c:43: }
+	sjmp	00106$
 ;------------------------------------------------------------
 ;Allocation info for local variables in function 'interrupt_timer'
 ;------------------------------------------------------------
-;	main.c:20: void interrupt_timer() __interrupt 1
+;cnt                       Allocated with name '_interrupt_timer_cnt_65536_23'
+;------------------------------------------------------------
+;	main.c:45: void interrupt_timer() __interrupt 1
 ;	-----------------------------------------
 ;	 function interrupt_timer
 ;	-----------------------------------------
@@ -434,54 +466,35 @@ _interrupt_timer:
 	push	(0+0)
 	push	psw
 	mov	psw,#0x00
-;	main.c:22: TH0 = T0RH;
+;	main.c:49: TH0 = T0RH;
 	mov	_TH0,_T0RH
-;	main.c:23: TL0 = T0RL;
+;	main.c:50: TL0 = T0RL;
 	mov	_TL0,_T0RL
-;	main.c:25: seg_index();
+;	main.c:52: if (cnt++ >= 1000)
+	mov	r6,_interrupt_timer_cnt_65536_23
+	mov	r7,(_interrupt_timer_cnt_65536_23 + 1)
+	inc	_interrupt_timer_cnt_65536_23
+	clr	a
+	cjne	a,_interrupt_timer_cnt_65536_23,00109$
+	inc	(_interrupt_timer_cnt_65536_23 + 1)
+00109$:
+	clr	c
+	mov	a,r6
+	subb	a,#0xe8
+	mov	a,r7
+	subb	a,#0x03
+	jc	00102$
+;	main.c:54: cnt = 0;
+	clr	a
+	mov	_interrupt_timer_cnt_65536_23,a
+	mov	(_interrupt_timer_cnt_65536_23 + 1),a
+;	main.c:55: flag_1s = 1;
+;	assignBit
+	setb	_flag_1s
+00102$:
+;	main.c:57: seg_index();
 	lcall	_seg_index
-;	main.c:26: }
-	pop	psw
-	pop	(0+0)
-	pop	(0+1)
-	pop	(0+2)
-	pop	(0+3)
-	pop	(0+4)
-	pop	(0+5)
-	pop	(0+6)
-	pop	(0+7)
-	pop	dph
-	pop	dpl
-	pop	b
-	pop	acc
-	pop	bits
-	reti
-;------------------------------------------------------------
-;Allocation info for local variables in function 'EXINT_ISR'
-;------------------------------------------------------------
-;	main.c:29: void EXINT_ISR() __interrupt 2
-;	-----------------------------------------
-;	 function EXINT_ISR
-;	-----------------------------------------
-_EXINT_ISR:
-	push	bits
-	push	acc
-	push	b
-	push	dpl
-	push	dph
-	push	(0+7)
-	push	(0+6)
-	push	(0+5)
-	push	(0+4)
-	push	(0+3)
-	push	(0+2)
-	push	(0+1)
-	push	(0+0)
-	push	psw
-	mov	psw,#0x00
-;	main.c:31: infrared_scan();
-	lcall	_infrared_scan
-;	main.c:32: }
+;	main.c:58: }
 	pop	psw
 	pop	(0+0)
 	pop	(0+1)

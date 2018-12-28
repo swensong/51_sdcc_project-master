@@ -18,5 +18,6 @@ main.rel
 time.rel
 seg.rel
 infrared.rel
+ds18b20.rel
 
 -e

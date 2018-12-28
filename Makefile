@@ -37,8 +37,8 @@ main.bin : main.hex
 main.hex : main.ihx
 	$(PACKIHX) main.ihx > main.hex
 
-main.ihx : main.c time.rel seg.rel infrared.rel
-	$(CC) $(INC_FLAGS) $(CFLAGS) main.c time.rel seg.rel infrared.rel
+main.ihx : main.c time.rel seg.rel infrared.rel ds18b20.rel
+	$(CC) $(INC_FLAGS) $(CFLAGS) main.c time.rel seg.rel infrared.rel ds18b20.rel
 
 time.rel : time.c
 	$(CC) -c $(INC_FLAGS) $(CFLAGS) time.c
@@ -48,6 +48,9 @@ seg.rel : seg.c
 
 infrared.rel : infrared.c
 	$(CC) -c $(INC_FLAGS) $(CFLAGS) infrared.c
+
+ds18b20.rel : ds18b20.c
+	$(CC) -c $(INC_FLAGS) $(CFLAGS) ds18b20.c
 
 .PHONY : clean update
 

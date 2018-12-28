@@ -8,10 +8,7 @@
 ;--------------------------------------------------------
 ; Public variables in this module
 ;--------------------------------------------------------
-	.globl _i2c_write
 	.globl _return_behind_data
-	.globl _i2c_stop
-	.globl _i2c_start
 	.globl _TF2
 	.globl _EXF2
 	.globl _RCLK
@@ -136,6 +133,9 @@
 	.globl _e2_read_PARM_3
 	.globl _e2_read_PARM_2
 	.globl _e2_write_byte_PARM_2
+	.globl _i2c_start
+	.globl _i2c_stop
+	.globl _i2c_write
 	.globl _i2c_read_nak
 	.globl _i2c_read_ack
 	.globl _e2_read_byte
@@ -280,9 +280,9 @@ _TF2	=	0x00cf
 ; internal ram data
 ;--------------------------------------------------------
 	.area DSEG    (DATA)
-_i2c_read_nak_dat_65536_27:
+_i2c_read_nak_dat_65536_30:
 	.ds 1
-_i2c_read_ack_dat_65536_35:
+_i2c_read_ack_dat_65536_38:
 	.ds 1
 _e2_write_byte_PARM_2:
 	.ds 1
@@ -580,7 +580,7 @@ _i2c_write:
 ;Allocation info for local variables in function 'i2c_read_nak'
 ;------------------------------------------------------------
 ;mask                      Allocated to registers r7 
-;dat                       Allocated with name '_i2c_read_nak_dat_65536_27'
+;dat                       Allocated with name '_i2c_read_nak_dat_65536_30'
 ;------------------------------------------------------------
 ;	i2c.c:77: unsigned char i2c_read_nak(void)
 ;	-----------------------------------------
@@ -610,12 +610,12 @@ _i2c_read_nak:
 	mov	r6,dpl
 	pop	ar7
 	mov	a,r6
-	anl	_i2c_read_nak_dat_65536_27,a
+	anl	_i2c_read_nak_dat_65536_30,a
 	sjmp	00103$
 00102$:
 ;	i2c.c:90: dat |= mask;        /* 为1时，dat中对应位置1 */
 	mov	a,r7
-	orl	_i2c_read_nak_dat_65536_27,a
+	orl	_i2c_read_nak_dat_65536_30,a
 00103$:
 ;	i2c.c:91: I2CDelay();
 	nop	
@@ -651,14 +651,14 @@ _i2c_read_nak:
 ;	assignBit
 	clr	_P3_7
 ;	i2c.c:100: return dat;
-	mov	dpl,_i2c_read_nak_dat_65536_27
+	mov	dpl,_i2c_read_nak_dat_65536_30
 ;	i2c.c:101: }
 	ret
 ;------------------------------------------------------------
 ;Allocation info for local variables in function 'i2c_read_ack'
 ;------------------------------------------------------------
 ;mask                      Allocated to registers r7 
-;dat                       Allocated with name '_i2c_read_ack_dat_65536_35'
+;dat                       Allocated with name '_i2c_read_ack_dat_65536_38'
 ;------------------------------------------------------------
 ;	i2c.c:104: unsigned char i2c_read_ack(void)
 ;	-----------------------------------------
@@ -688,12 +688,12 @@ _i2c_read_ack:
 	mov	r6,dpl
 	pop	ar7
 	mov	a,r6
-	anl	_i2c_read_ack_dat_65536_35,a
+	anl	_i2c_read_ack_dat_65536_38,a
 	sjmp	00103$
 00102$:
 ;	i2c.c:117: dat |= mask;        /* 为1时，dat中对应位置1 */
 	mov	a,r7
-	orl	_i2c_read_ack_dat_65536_35,a
+	orl	_i2c_read_ack_dat_65536_38,a
 00103$:
 ;	i2c.c:118: I2CDelay();
 	nop	
@@ -729,7 +729,7 @@ _i2c_read_ack:
 ;	assignBit
 	clr	_P3_7
 ;	i2c.c:127: return dat;
-	mov	dpl,_i2c_read_ack_dat_65536_35
+	mov	dpl,_i2c_read_ack_dat_65536_38
 ;	i2c.c:128: }
 	ret
 ;------------------------------------------------------------

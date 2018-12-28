@@ -10,9 +10,9 @@
 ;--------------------------------------------------------
 	.globl _interrupt_timer
 	.globl _main
-	.globl _get_adc_value
+	.globl _key_scan
+	.globl _key_driver
 	.globl _time0_init
-	.globl _seg_show_num
 	.globl _seg_index
 	.globl _seg_init
 	.globl _TF2
@@ -289,7 +289,7 @@ bits:
 	.area DSEG    (DATA)
 _flag_1s::
 	.ds 1
-_interrupt_timer_cnt_65536_12:
+_interrupt_timer_cnt_65536_16:
 	.ds 2
 ;--------------------------------------------------------
 ; overlayable items in internal ram 
@@ -365,13 +365,13 @@ __interrupt_vect:
 ;------------------------------------------------------------
 ;Allocation info for local variables in function 'interrupt_timer'
 ;------------------------------------------------------------
-;cnt                       Allocated with name '_interrupt_timer_cnt_65536_12'
+;cnt                       Allocated with name '_interrupt_timer_cnt_65536_16'
 ;------------------------------------------------------------
-;	main.c:29: static unsigned int cnt = 0;
+;	main.c:30: static unsigned int cnt = 0;
 	clr	a
-	mov	_interrupt_timer_cnt_65536_12,a
-	mov	(_interrupt_timer_cnt_65536_12 + 1),a
-;	main.c:5: unsigned char flag_1s = 0;
+	mov	_interrupt_timer_cnt_65536_16,a
+	mov	(_interrupt_timer_cnt_65536_16 + 1),a
+;	main.c:6: unsigned char flag_1s = 0;
 ;	1-genFromRTrack replaced	mov	_flag_1s,#0x00
 	mov	_flag_1s,a
 	.area GSFINAL (CODE)
@@ -393,7 +393,7 @@ __sdcc_program_startup:
 ;------------------------------------------------------------
 ;flag_cnt                  Allocated to registers 
 ;------------------------------------------------------------
-;	main.c:7: void main(void)
+;	main.c:8: void main(void)
 ;	-----------------------------------------
 ;	 function main
 ;	-----------------------------------------
@@ -406,35 +406,31 @@ _main:
 	ar2 = 0x02
 	ar1 = 0x01
 	ar0 = 0x00
-;	main.c:11: seg_init();
+;	main.c:12: seg_init();
 	lcall	_seg_init
-;	main.c:12: time0_init(1);
+;	main.c:13: time0_init(1);
 	mov	dptr,#0x0001
 	lcall	_time0_init
-;	main.c:13: EA = 1;
+;	main.c:14: EA = 1;
 ;	assignBit
 	setb	_EA
-;	main.c:16: while (1)
+;	main.c:17: while (1)
 00104$:
-;	main.c:18: if (flag_1s == 1)
+;	main.c:19: key_driver();
+	lcall	_key_driver
+;	main.c:20: if (flag_1s == 1)
 	mov	a,#0x01
 	cjne	a,_flag_1s,00104$
-;	main.c:21: flag_1s = 0;
+;	main.c:23: flag_1s = 0;
 	mov	_flag_1s,#0x00
-;	main.c:22: seg_show_num(get_adc_value(0));
-	mov	dpl,#0x00
-	lcall	_get_adc_value
-	mov	r6,#0x00
-	mov	dph,r6
-	lcall	_seg_show_num
-;	main.c:25: }
+;	main.c:26: }
 	sjmp	00104$
 ;------------------------------------------------------------
 ;Allocation info for local variables in function 'interrupt_timer'
 ;------------------------------------------------------------
-;cnt                       Allocated with name '_interrupt_timer_cnt_65536_12'
+;cnt                       Allocated with name '_interrupt_timer_cnt_65536_16'
 ;------------------------------------------------------------
-;	main.c:27: void interrupt_timer() __interrupt 1
+;	main.c:28: void interrupt_timer() __interrupt 1
 ;	-----------------------------------------
 ;	 function interrupt_timer
 ;	-----------------------------------------
@@ -454,17 +450,17 @@ _interrupt_timer:
 	push	(0+0)
 	push	psw
 	mov	psw,#0x00
-;	main.c:31: TH0 = T0RH;
+;	main.c:32: TH0 = T0RH;
 	mov	_TH0,_T0RH
-;	main.c:32: TL0 = T0RL;
+;	main.c:33: TL0 = T0RL;
 	mov	_TL0,_T0RL
-;	main.c:34: if (cnt++ >= 1000)
-	mov	r6,_interrupt_timer_cnt_65536_12
-	mov	r7,(_interrupt_timer_cnt_65536_12 + 1)
-	inc	_interrupt_timer_cnt_65536_12
+;	main.c:35: if (cnt++ >= 1000)
+	mov	r6,_interrupt_timer_cnt_65536_16
+	mov	r7,(_interrupt_timer_cnt_65536_16 + 1)
+	inc	_interrupt_timer_cnt_65536_16
 	clr	a
-	cjne	a,_interrupt_timer_cnt_65536_12,00109$
-	inc	(_interrupt_timer_cnt_65536_12 + 1)
+	cjne	a,_interrupt_timer_cnt_65536_16,00109$
+	inc	(_interrupt_timer_cnt_65536_16 + 1)
 00109$:
 	clr	c
 	mov	a,r6
@@ -472,16 +468,18 @@ _interrupt_timer:
 	mov	a,r7
 	subb	a,#0x03
 	jc	00102$
-;	main.c:36: cnt = 0;
+;	main.c:37: cnt = 0;
 	clr	a
-	mov	_interrupt_timer_cnt_65536_12,a
-	mov	(_interrupt_timer_cnt_65536_12 + 1),a
-;	main.c:37: flag_1s = 1;
+	mov	_interrupt_timer_cnt_65536_16,a
+	mov	(_interrupt_timer_cnt_65536_16 + 1),a
+;	main.c:38: flag_1s = 1;
 	mov	_flag_1s,#0x01
 00102$:
-;	main.c:39: seg_index();
+;	main.c:40: key_scan();
+	lcall	_key_scan
+;	main.c:41: seg_index();
 	lcall	_seg_index
-;	main.c:40: }
+;	main.c:42: }
 	pop	psw
 	pop	(0+0)
 	pop	(0+1)

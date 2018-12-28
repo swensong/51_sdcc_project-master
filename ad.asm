@@ -133,6 +133,7 @@
 	.globl _SP
 	.globl _P0
 	.globl _get_adc_value
+	.globl _set_dac_out
 ;--------------------------------------------------------
 ; special function registers
 ;--------------------------------------------------------
@@ -386,6 +387,41 @@ _get_adc_value:
 	mov	dpl,r7
 ;	ad.c:22: }
 	ret
+;------------------------------------------------------------
+;Allocation info for local variables in function 'set_dac_out'
+;------------------------------------------------------------
+;val                       Allocated to registers r7 
+;------------------------------------------------------------
+;	ad.c:24: void set_dac_out(unsigned char val)
+;	-----------------------------------------
+;	 function set_dac_out
+;	-----------------------------------------
+_set_dac_out:
+	mov	r7,dpl
+;	ad.c:26: i2c_start();
+	push	ar7
+	lcall	_i2c_start
+;	ad.c:27: if (!i2c_write(0x48 << 1))
+	mov	dpl,#0x90
+	lcall	_i2c_write
+	mov	a,dpl
+	pop	ar7
+	jnz	00102$
+;	ad.c:29: i2c_stop();
+;	ad.c:30: return;
+	ljmp	_i2c_stop
+00102$:
+;	ad.c:32: i2c_write(0x40);
+	mov	dpl,#0x40
+	push	ar7
+	lcall	_i2c_write
+	pop	ar7
+;	ad.c:33: i2c_write(val);
+	mov	dpl,r7
+	lcall	_i2c_write
+;	ad.c:34: i2c_stop();
+;	ad.c:35: }
+	ljmp	_i2c_stop
 	.area CSEG    (CODE)
 	.area CONST   (CODE)
 	.area XINIT   (CODE)

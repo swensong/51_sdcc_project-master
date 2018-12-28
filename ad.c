@@ -20,3 +20,16 @@ unsigned char get_adc_value(unsigned char chn)
 
     return val;
 }
+
+void set_dac_out(unsigned char val)
+{
+    i2c_start();
+    if (!i2c_write(0x48 << 1))
+    {
+        i2c_stop();
+        return;
+    }
+    i2c_write(0x40);
+    i2c_write(val);
+    i2c_stop();
+}

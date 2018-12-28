@@ -37,8 +37,8 @@ main.bin : main.hex
 main.hex : main.ihx
 	$(PACKIHX) main.ihx > main.hex
 
-main.ihx : main.c time.rel seg.rel i2c.rel ad.rel
-	$(CC) $(INC_FLAGS) $(CFLAGS) main.c time.rel seg.rel i2c.rel ad.rel
+main.ihx : main.c time.rel seg.rel i2c.rel ad.rel key.rel
+	$(CC) $(INC_FLAGS) $(CFLAGS) main.c time.rel seg.rel i2c.rel ad.rel key.rel
 
 time.rel : time.c
 	$(CC) -c $(INC_FLAGS) $(CFLAGS) time.c
@@ -51,6 +51,9 @@ i2c.rel : i2c.c
 
 ad.rel : ad.c
 	$(CC) -c $(INC_FLAGS) $(CFLAGS) ad.c
+
+key.rel : key.c
+	$(CC) -c $(INC_FLAGS) $(CFLAGS) key.c
 
 .PHONY : clean update
 

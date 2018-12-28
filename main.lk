@@ -19,5 +19,6 @@ time.rel
 seg.rel
 i2c.rel
 ad.rel
+key.rel
 
 -e

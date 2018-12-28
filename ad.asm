@@ -2,19 +2,17 @@
 ; File Created by SDCC : free open source ANSI-C Compiler
 ; Version 3.8.0 #10562 (Linux)
 ;--------------------------------------------------------
-	.module main
+	.module ad
 	.optsdcc -mmcs51 --model-small
 	
 ;--------------------------------------------------------
 ; Public variables in this module
 ;--------------------------------------------------------
-	.globl _interrupt_timer
-	.globl _main
-	.globl _get_adc_value
-	.globl _time0_init
-	.globl _seg_show_num
-	.globl _seg_index
-	.globl _seg_init
+	.globl _i2c_read_nak
+	.globl _i2c_read_ack
+	.globl _i2c_write
+	.globl _i2c_stop
+	.globl _i2c_start
 	.globl _TF2
 	.globl _EXF2
 	.globl _RCLK
@@ -134,7 +132,7 @@
 	.globl _DPL
 	.globl _SP
 	.globl _P0
-	.globl _flag_1s
+	.globl _get_adc_value
 ;--------------------------------------------------------
 ; special function registers
 ;--------------------------------------------------------
@@ -270,37 +268,12 @@ _TF2	=	0x00cf
 	.area REG_BANK_0	(REL,OVR,DATA)
 	.ds 8
 ;--------------------------------------------------------
-; overlayable bit register bank
-;--------------------------------------------------------
-	.area BIT_BANK	(REL,OVR,DATA)
-bits:
-	.ds 1
-	b0 = bits[0]
-	b1 = bits[1]
-	b2 = bits[2]
-	b3 = bits[3]
-	b4 = bits[4]
-	b5 = bits[5]
-	b6 = bits[6]
-	b7 = bits[7]
-;--------------------------------------------------------
 ; internal ram data
 ;--------------------------------------------------------
 	.area DSEG    (DATA)
-_flag_1s::
-	.ds 1
-_interrupt_timer_cnt_65536_12:
-	.ds 2
 ;--------------------------------------------------------
 ; overlayable items in internal ram 
 ;--------------------------------------------------------
-;--------------------------------------------------------
-; Stack segment in internal ram 
-;--------------------------------------------------------
-	.area	SSEG
-__start__stack:
-	.ds	1
-
 ;--------------------------------------------------------
 ; indirectly addressable internal ram data
 ;--------------------------------------------------------
@@ -341,63 +314,32 @@ __start__stack:
 	.area GSFINAL (CODE)
 	.area CSEG    (CODE)
 ;--------------------------------------------------------
-; interrupt vector 
-;--------------------------------------------------------
-	.area HOME    (CODE)
-__interrupt_vect:
-	ljmp	__sdcc_gsinit_startup
-	reti
-	.ds	7
-	ljmp	_interrupt_timer
-;--------------------------------------------------------
 ; global & static initialisations
 ;--------------------------------------------------------
 	.area HOME    (CODE)
 	.area GSINIT  (CODE)
 	.area GSFINAL (CODE)
 	.area GSINIT  (CODE)
-	.globl __sdcc_gsinit_startup
-	.globl __sdcc_program_startup
-	.globl __start__stack
-	.globl __mcs51_genXINIT
-	.globl __mcs51_genXRAMCLEAR
-	.globl __mcs51_genRAMCLEAR
-;------------------------------------------------------------
-;Allocation info for local variables in function 'interrupt_timer'
-;------------------------------------------------------------
-;cnt                       Allocated with name '_interrupt_timer_cnt_65536_12'
-;------------------------------------------------------------
-;	main.c:29: static unsigned int cnt = 0;
-	clr	a
-	mov	_interrupt_timer_cnt_65536_12,a
-	mov	(_interrupt_timer_cnt_65536_12 + 1),a
-;	main.c:5: unsigned char flag_1s = 0;
-;	1-genFromRTrack replaced	mov	_flag_1s,#0x00
-	mov	_flag_1s,a
-	.area GSFINAL (CODE)
-	ljmp	__sdcc_program_startup
 ;--------------------------------------------------------
 ; Home
 ;--------------------------------------------------------
 	.area HOME    (CODE)
 	.area HOME    (CODE)
-__sdcc_program_startup:
-	ljmp	_main
-;	return from main will return to caller
 ;--------------------------------------------------------
 ; code
 ;--------------------------------------------------------
 	.area CSEG    (CODE)
 ;------------------------------------------------------------
-;Allocation info for local variables in function 'main'
+;Allocation info for local variables in function 'get_adc_value'
 ;------------------------------------------------------------
-;flag_cnt                  Allocated to registers 
+;chn                       Allocated to registers r7 
+;val                       Allocated to registers r7 
 ;------------------------------------------------------------
-;	main.c:7: void main(void)
+;	ad.c:4: unsigned char get_adc_value(unsigned char chn)
 ;	-----------------------------------------
-;	 function main
+;	 function get_adc_value
 ;	-----------------------------------------
-_main:
+_get_adc_value:
 	ar7 = 0x07
 	ar6 = 0x06
 	ar5 = 0x05
@@ -406,97 +348,44 @@ _main:
 	ar2 = 0x02
 	ar1 = 0x01
 	ar0 = 0x00
-;	main.c:11: seg_init();
-	lcall	_seg_init
-;	main.c:12: time0_init(1);
-	mov	dptr,#0x0001
-	lcall	_time0_init
-;	main.c:13: EA = 1;
-;	assignBit
-	setb	_EA
-;	main.c:16: while (1)
-00104$:
-;	main.c:18: if (flag_1s == 1)
-	mov	a,#0x01
-	cjne	a,_flag_1s,00104$
-;	main.c:21: flag_1s = 0;
-	mov	_flag_1s,#0x00
-;	main.c:22: seg_show_num(get_adc_value(0));
+	mov	r7,dpl
+;	ad.c:8: i2c_start();
+	push	ar7
+	lcall	_i2c_start
+;	ad.c:9: if (!i2c_write(0x48 << 1)) /* 寻址PCF8591，如果未应答，则停止操作并返回0 */
+	mov	dpl,#0x90
+	lcall	_i2c_write
+	mov	a,dpl
+	pop	ar7
+	jnz	00102$
+;	ad.c:11: i2c_stop();
+	lcall	_i2c_stop
+;	ad.c:12: return 0;
 	mov	dpl,#0x00
-	lcall	_get_adc_value
-	mov	r6,#0x00
-	mov	dph,r6
-	lcall	_seg_show_num
-;	main.c:25: }
-	sjmp	00104$
-;------------------------------------------------------------
-;Allocation info for local variables in function 'interrupt_timer'
-;------------------------------------------------------------
-;cnt                       Allocated with name '_interrupt_timer_cnt_65536_12'
-;------------------------------------------------------------
-;	main.c:27: void interrupt_timer() __interrupt 1
-;	-----------------------------------------
-;	 function interrupt_timer
-;	-----------------------------------------
-_interrupt_timer:
-	push	bits
-	push	acc
-	push	b
-	push	dpl
-	push	dph
-	push	(0+7)
-	push	(0+6)
-	push	(0+5)
-	push	(0+4)
-	push	(0+3)
-	push	(0+2)
-	push	(0+1)
-	push	(0+0)
-	push	psw
-	mov	psw,#0x00
-;	main.c:31: TH0 = T0RH;
-	mov	_TH0,_T0RH
-;	main.c:32: TL0 = T0RL;
-	mov	_TL0,_T0RL
-;	main.c:34: if (cnt++ >= 1000)
-	mov	r6,_interrupt_timer_cnt_65536_12
-	mov	r7,(_interrupt_timer_cnt_65536_12 + 1)
-	inc	_interrupt_timer_cnt_65536_12
-	clr	a
-	cjne	a,_interrupt_timer_cnt_65536_12,00109$
-	inc	(_interrupt_timer_cnt_65536_12 + 1)
-00109$:
-	clr	c
-	mov	a,r6
-	subb	a,#0xe8
-	mov	a,r7
-	subb	a,#0x03
-	jc	00102$
-;	main.c:36: cnt = 0;
-	clr	a
-	mov	_interrupt_timer_cnt_65536_12,a
-	mov	(_interrupt_timer_cnt_65536_12 + 1),a
-;	main.c:37: flag_1s = 1;
-	mov	_flag_1s,#0x01
+	ret
 00102$:
-;	main.c:39: seg_index();
-	lcall	_seg_index
-;	main.c:40: }
-	pop	psw
-	pop	(0+0)
-	pop	(0+1)
-	pop	(0+2)
-	pop	(0+3)
-	pop	(0+4)
-	pop	(0+5)
-	pop	(0+6)
-	pop	(0+7)
-	pop	dph
-	pop	dpl
-	pop	b
-	pop	acc
-	pop	bits
-	reti
+;	ad.c:14: i2c_write(0x40 | chn);      /* 写入控制字节，选择转换通道 */
+	orl	ar7,#0x40
+	mov	dpl,r7
+	lcall	_i2c_write
+;	ad.c:15: i2c_start();
+	lcall	_i2c_start
+;	ad.c:16: i2c_write((0x48<<1) | 0x01); /* 寻址PCF8591，指定后续为读操作 */
+	mov	dpl,#0x91
+	lcall	_i2c_write
+;	ad.c:17: i2c_read_ack();              /* 先空读一个字节，提供采样转化时间 */
+	lcall	_i2c_read_ack
+;	ad.c:18: val = i2c_read_nak();        /* 读取刚刚转换完的值 */
+	lcall	_i2c_read_nak
+	mov	r7,dpl
+;	ad.c:19: i2c_stop();
+	push	ar7
+	lcall	_i2c_stop
+	pop	ar7
+;	ad.c:21: return val;
+	mov	dpl,r7
+;	ad.c:22: }
+	ret
 	.area CSEG    (CODE)
 	.area CONST   (CODE)
 	.area XINIT   (CODE)

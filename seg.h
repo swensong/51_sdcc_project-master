@@ -16,7 +16,4 @@ void seg_show_num(unsigned int num);
 void seg_driver(char sec);
 void seg_infrared_driver(void);
 
-extern unsigned char led_buff[6];
-extern unsigned char __code led_char[16];
-
 #endif

@@ -1,44 +1,26 @@
 #include "seg.h"
 #include "time.h"
-#include "infrared.h"
-#include "ds18b20.h"
+#include "ad.h"
 
-__bit flag_1s = 0;
+unsigned char flag_1s = 0;
 
 void main(void)
 {
-    __bit res;
-    int temp;
-    int intT, decT;
+    int flag_cnt = 110;
 
     seg_init();
     time0_init(1);
     EA = 1;
 
 
-    start_18b20();
-
     while (1)
     {
         if (flag_1s == 1)
         {
+            /* seg_show_num(flag_cnt++); */
             flag_1s = 0;
-            res = get_18b20_temp(&temp);
-            if (res)
-            {
-                intT = temp >> 4;
-                seg_show_num(intT);
-                decT = temp & 0xF;
-                /* seg_show_num(intT); */
-            }
-            else
-            {
-                /* seg_show_num(1000); */
-            }
-            start_18b20();
+            seg_show_num(get_adc_value(0));
         }
-
-        /* seg_infrared_driver(); */
     }
 }
 

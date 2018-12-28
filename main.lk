@@ -17,7 +17,7 @@
 main.rel
 time.rel
 seg.rel
-infrared.rel
-ds18b20.rel
+i2c.rel
+ad.rel
 
 -e

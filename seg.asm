@@ -8,7 +8,6 @@
 ;--------------------------------------------------------
 ; Public variables in this module
 ;--------------------------------------------------------
-	.globl _led_char
 	.globl _TF2
 	.globl _EXF2
 	.globl _RCLK
@@ -130,6 +129,7 @@
 	.globl _P0
 	.globl _i
 	.globl _led_buff
+	.globl _led_char
 	.globl _seg_show_num
 	.globl _seg_init
 	.globl _seg_driver
@@ -273,6 +273,8 @@ _TF2	=	0x00cf
 ; internal ram data
 ;--------------------------------------------------------
 	.area DSEG    (DATA)
+_led_char::
+	.ds 16
 _led_buff::
 	.ds 6
 _i::
@@ -335,6 +337,23 @@ _seg_index_i_65536_17:
 ;------------------------------------------------------------
 ;	seg.c:42: static char i = 0;
 	mov	_seg_index_i_65536_17,#0x00
+;	seg.c:4: unsigned char led_char[16] = { /* 数码管显示字符转换表 */
+	mov	_led_char,#0xc0
+	mov	(_led_char + 0x0001),#0xf9
+	mov	(_led_char + 0x0002),#0xa4
+	mov	(_led_char + 0x0003),#0xb0
+	mov	(_led_char + 0x0004),#0x99
+	mov	(_led_char + 0x0005),#0x92
+	mov	(_led_char + 0x0006),#0x82
+	mov	(_led_char + 0x0007),#0xf8
+	mov	(_led_char + 0x0008),#0x80
+	mov	(_led_char + 0x0009),#0x90
+	mov	(_led_char + 0x000a),#0x88
+	mov	(_led_char + 0x000b),#0x83
+	mov	(_led_char + 0x000c),#0xc6
+	mov	(_led_char + 0x000d),#0xa1
+	mov	(_led_char + 0x000e),#0x86
+	mov	(_led_char + 0x000f),#0x8e
 ;	seg.c:9: unsigned char led_buff[6] = {    /* 数码管显示缓冲区，初始值0xFF确定启动不亮 */
 	mov	_led_buff,#0xff
 	mov	(_led_buff + 0x0001),#0xff
@@ -380,18 +399,12 @@ _seg_show_num:
 	push	ar6
 	lcall	__divuint
 	mov	r4,dpl
-	mov	r5,dph
 	pop	ar6
 	pop	ar7
 	mov	a,r4
 	add	a,#_led_char
-	mov	dpl,a
-	mov	a,r5
-	addc	a,#(_led_char >> 8)
-	mov	dph,a
-	clr	a
-	movc	a,@a+dptr
-	mov	r5,a
+	mov	r1,a
+	mov	ar5,@r1
 	mov	(_led_buff + 0x0004),r5
 ;	seg.c:18: led_buff[3] = led_char[num / 1000 % 10];
 	mov	__divuint_PARM_2,#0xe8
@@ -405,18 +418,12 @@ _seg_show_num:
 	mov	(__moduint_PARM_2 + 1),#0x00
 	lcall	__moduint
 	mov	r4,dpl
-	mov	r5,dph
 	pop	ar6
 	pop	ar7
 	mov	a,r4
 	add	a,#_led_char
-	mov	dpl,a
-	mov	a,r5
-	addc	a,#(_led_char >> 8)
-	mov	dph,a
-	clr	a
-	movc	a,@a+dptr
-	mov	r5,a
+	mov	r1,a
+	mov	ar5,@r1
 	mov	(_led_buff + 0x0003),r5
 ;	seg.c:19: led_buff[2] = led_char[num / 100 % 10];
 	mov	__divuint_PARM_2,#0x64
@@ -430,18 +437,12 @@ _seg_show_num:
 	mov	(__moduint_PARM_2 + 1),#0x00
 	lcall	__moduint
 	mov	r4,dpl
-	mov	r5,dph
 	pop	ar6
 	pop	ar7
 	mov	a,r4
 	add	a,#_led_char
-	mov	dpl,a
-	mov	a,r5
-	addc	a,#(_led_char >> 8)
-	mov	dph,a
-	clr	a
-	movc	a,@a+dptr
-	mov	r5,a
+	mov	r1,a
+	mov	ar5,@r1
 	mov	(_led_buff + 0x0002),r5
 ;	seg.c:20: led_buff[1] = led_char[num / 10 % 10];
 	mov	__divuint_PARM_2,#0x0a
@@ -455,18 +456,12 @@ _seg_show_num:
 	mov	(__moduint_PARM_2 + 1),#0x00
 	lcall	__moduint
 	mov	r4,dpl
-	mov	r5,dph
 	pop	ar6
 	pop	ar7
 	mov	a,r4
 	add	a,#_led_char
-	mov	dpl,a
-	mov	a,r5
-	addc	a,#(_led_char >> 8)
-	mov	dph,a
-	clr	a
-	movc	a,@a+dptr
-	mov	r5,a
+	mov	r1,a
+	mov	ar5,@r1
 	mov	(_led_buff + 0x0001),r5
 ;	seg.c:21: led_buff[0] = led_char[num % 10];
 	mov	__moduint_PARM_2,#0x0a
@@ -474,17 +469,10 @@ _seg_show_num:
 	mov	dpl,r6
 	mov	dph,r7
 	lcall	__moduint
-	mov	r6,dpl
-	mov	r7,dph
-	mov	a,r6
+	mov	a,dpl
 	add	a,#_led_char
-	mov	dpl,a
-	mov	a,r7
-	addc	a,#(_led_char >> 8)
-	mov	dph,a
-	clr	a
-	movc	a,@a+dptr
-	mov	r7,a
+	mov	r1,a
+	mov	ar7,@r1
 	mov	_led_buff,r7
 ;	seg.c:22: }
 	ret
@@ -528,18 +516,12 @@ _seg_driver:
 	push	ar5
 	lcall	__modsint
 	mov	r3,dpl
-	mov	r4,dph
 	pop	ar5
 	pop	ar6
 	mov	a,r3
 	add	a,#_led_char
-	mov	dpl,a
-	mov	a,r4
-	addc	a,#(_led_char >> 8)
-	mov	dph,a
-	clr	a
-	movc	a,@a+dptr
-	mov	r4,a
+	mov	r1,a
+	mov	ar4,@r1
 	mov	_led_buff,r4
 ;	seg.c:33: led_buff[1] = led_char[sec/10%10];
 	mov	__divsint_PARM_2,#0x0a
@@ -553,18 +535,12 @@ _seg_driver:
 	mov	(__modsint_PARM_2 + 1),#0x00
 	lcall	__modsint
 	mov	r3,dpl
-	mov	r4,dph
 	pop	ar5
 	pop	ar6
 	mov	a,r3
 	add	a,#_led_char
-	mov	dpl,a
-	mov	a,r4
-	addc	a,#(_led_char >> 8)
-	mov	dph,a
-	clr	a
-	movc	a,@a+dptr
-	mov	r4,a
+	mov	r1,a
+	mov	ar4,@r1
 	mov	(_led_buff + 0x0001),r4
 ;	seg.c:34: led_buff[2] = led_char[sec/100%10];
 	mov	__divsint_PARM_2,#0x64
@@ -578,18 +554,12 @@ _seg_driver:
 	mov	(__modsint_PARM_2 + 1),#0x00
 	lcall	__modsint
 	mov	r3,dpl
-	mov	r4,dph
 	pop	ar5
 	pop	ar6
 	mov	a,r3
 	add	a,#_led_char
-	mov	dpl,a
-	mov	a,r4
-	addc	a,#(_led_char >> 8)
-	mov	dph,a
-	clr	a
-	movc	a,@a+dptr
-	mov	r4,a
+	mov	r1,a
+	mov	ar4,@r1
 	mov	(_led_buff + 0x0002),r4
 ;	seg.c:35: led_buff[3] = led_char[sec/1000%10];
 	mov	__divsint_PARM_2,#0xe8
@@ -603,18 +573,12 @@ _seg_driver:
 	mov	(__modsint_PARM_2 + 1),#0x00
 	lcall	__modsint
 	mov	r3,dpl
-	mov	r4,dph
 	pop	ar5
 	pop	ar6
 	mov	a,r3
 	add	a,#_led_char
-	mov	dpl,a
-	mov	a,r4
-	addc	a,#(_led_char >> 8)
-	mov	dph,a
-	clr	a
-	movc	a,@a+dptr
-	mov	r4,a
+	mov	r1,a
+	mov	ar4,@r1
 	mov	(_led_buff + 0x0003),r4
 ;	seg.c:36: led_buff[4] = led_char[sec/10000%10];
 	mov	__divsint_PARM_2,#0x10
@@ -626,17 +590,11 @@ _seg_driver:
 	mov	(__modsint_PARM_2 + 1),#0x00
 	lcall	__modsint
 	mov	r5,dpl
-	mov	r6,dph
 	pop	ar7
 	mov	a,r5
 	add	a,#_led_char
-	mov	dpl,a
-	mov	a,r6
-	addc	a,#(_led_char >> 8)
-	mov	dph,a
-	clr	a
-	movc	a,@a+dptr
-	mov	r6,a
+	mov	r1,a
+	mov	ar6,@r1
 	mov	(_led_buff + 0x0004),r6
 ;	seg.c:37: led_buff[5] = led_char[sec/100000%10];
 	mov	r6,#0x00
@@ -666,17 +624,10 @@ _seg_driver:
 	mov	b,r6
 	mov	a,r7
 	lcall	__modslong
-	mov	r4,dpl
-	mov	r5,dph
-	mov	a,r4
+	mov	a,dpl
 	add	a,#_led_char
-	mov	dpl,a
-	mov	a,r5
-	addc	a,#(_led_char >> 8)
-	mov	dph,a
-	clr	a
-	movc	a,@a+dptr
-	mov	r7,a
+	mov	r1,a
+	mov	ar7,@r1
 	mov	(_led_buff + 0x0005),r7
 ;	seg.c:38: }
 	ret
@@ -794,67 +745,38 @@ _seg_infrared_driver:
 	mov	a,_ir_code
 	swap	a
 	anl	a,#0x0f
-	mov	dptr,#_led_char
-	movc	a,@a+dptr
-	mov	r7,a
+	add	a,#_led_char
+	mov	r1,a
+	mov	ar7,@r1
 	mov	(_led_buff + 0x0005),r7
 ;	seg.c:64: led_buff[4] = led_char[ir_code[0] & 0x0F];
 	mov	r6,_ir_code
 	anl	ar6,#0x0f
-	mov	r7,#0x00
 	mov	a,r6
 	add	a,#_led_char
-	mov	dpl,a
-	mov	a,r7
-	addc	a,#(_led_char >> 8)
-	mov	dph,a
-	clr	a
-	movc	a,@a+dptr
-	mov	r7,a
+	mov	r1,a
+	mov	ar7,@r1
 	mov	(_led_buff + 0x0004),r7
 ;	seg.c:65: led_buff[1] = led_char[ir_code[2] >> 4]; /* 键吗显示 */
 	mov	a,(_ir_code + 0x0002)
 	swap	a
 	anl	a,#0x0f
-	mov	dptr,#_led_char
-	movc	a,@a+dptr
-	mov	r7,a
+	add	a,#_led_char
+	mov	r1,a
+	mov	ar7,@r1
 	mov	(_led_buff + 0x0001),r7
 ;	seg.c:66: led_buff[0] = led_char[ir_code[2] & 0x0F];
 	mov	r6,(_ir_code + 0x0002)
 	anl	ar6,#0x0f
-	mov	r7,#0x00
 	mov	a,r6
 	add	a,#_led_char
-	mov	dpl,a
-	mov	a,r7
-	addc	a,#(_led_char >> 8)
-	mov	dph,a
-	clr	a
-	movc	a,@a+dptr
-	mov	r7,a
+	mov	r1,a
+	mov	ar7,@r1
 	mov	_led_buff,r7
 00103$:
 ;	seg.c:68: }
 	ret
 	.area CSEG    (CODE)
 	.area CONST   (CODE)
-_led_char:
-	.db #0xc0	; 192
-	.db #0xf9	; 249
-	.db #0xa4	; 164
-	.db #0xb0	; 176
-	.db #0x99	; 153
-	.db #0x92	; 146
-	.db #0x82	; 130
-	.db #0xf8	; 248
-	.db #0x80	; 128
-	.db #0x90	; 144
-	.db #0x88	; 136
-	.db #0x83	; 131
-	.db #0xc6	; 198
-	.db #0xa1	; 161
-	.db #0x86	; 134
-	.db #0x8e	; 142
 	.area XINIT   (CODE)
 	.area CABS    (ABS,CODE)

@@ -24,10 +24,10 @@ void main(void)
         {
             flag_1s = 0;
             res = get_18b20_temp(&temp);
-            seg_show_num(temp);
             if (res)
             {
                 intT = temp >> 4;
+                seg_show_num(intT);
                 decT = temp & 0xF;
                 /* seg_show_num(intT); */
             }

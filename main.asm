@@ -426,17 +426,41 @@ _main:
 ;	main.c:23: if (flag_1s == 1)
 ;	main.c:25: flag_1s = 0;
 ;	assignBit
-	jbc	_flag_1s,00119$
+	jbc	_flag_1s,00122$
 	sjmp	00106$
-00119$:
+00122$:
 ;	main.c:26: res = get_18b20_temp(&temp);
 	mov	dptr,#_main_temp_65536_18
 	mov	b,#0x40
 	lcall	_get_18b20_temp
-;	main.c:27: seg_show_num(temp);
+;	assignBit
+	mov	a,dpl
+	add	a,#0xff
+	clr	a
+	rlc	a
+;	main.c:27: if (res)
+	jz	00102$
+;	main.c:29: intT = temp >> 4;
 	mov	dpl,_main_temp_65536_18
-	mov	dph,(_main_temp_65536_18 + 1)
+	mov	a,(_main_temp_65536_18 + 1)
+	swap	a
+	xch	a,dpl
+	swap	a
+	anl	a,#0x0f
+	xrl	a,dpl
+	xch	a,dpl
+	anl	a,#0x0f
+	xch	a,dpl
+	xrl	a,dpl
+	xch	a,dpl
+	jnb	acc.3,00124$
+	orl	a,#0xf0
+00124$:
+	mov	dph,a
+;	main.c:30: seg_show_num(intT);
 	lcall	_seg_show_num
+;	main.c:31: decT = temp & 0xF;
+00102$:
 ;	main.c:38: start_18b20();
 	lcall	_start_18b20
 ;	main.c:43: }
